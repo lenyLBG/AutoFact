@@ -1,0 +1,17 @@
+# Dossiers de Visual Studio
+.vs/
+bin/
+obj/
+
+# Fichiers temporaires
+*.user
+*.suo
+*.tmp
+*.log
+
+# Packages
+*.nupkg
+*.nuget/
+
+# Autres fichiers système
+Thumbs.db
