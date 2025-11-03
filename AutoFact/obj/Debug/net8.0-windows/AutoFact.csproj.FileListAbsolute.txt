@@ -21,3 +21,5 @@ C:\Users\LEBORGNE\source\repos\AutoFact\AutoFact\obj\Debug\net8.0-windows\refint
 C:\Users\LEBORGNE\source\repos\AutoFact\AutoFact\obj\Debug\net8.0-windows\AutoFact.pdb
 C:\Users\LEBORGNE\source\repos\AutoFact\AutoFact\obj\Debug\net8.0-windows\AutoFact.genruntimeconfig.cache
 C:\Users\LEBORGNE\source\repos\AutoFact\AutoFact\obj\Debug\net8.0-windows\ref\AutoFact.dll
+C:\Users\LEBORGNE\source\repos\AutoFact\AutoFact\obj\Debug\net8.0-windows\AutoFact.Properties.Resources.resources
+C:\Users\LEBORGNE\source\repos\AutoFact\AutoFact\obj\Debug\net8.0-windows\AutoFact.sourcelink.json
