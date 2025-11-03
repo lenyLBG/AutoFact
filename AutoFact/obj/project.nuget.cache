@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "lbKOTWuT9MY=",
+  "success": true,
+  "projectFilePath": "C:\\Users\\LEBORGNE\\source\\repos\\AutoFact\\AutoFact\\AutoFact.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\LEBORGNE\\.nuget\\packages\\stub.system.data.sqlite.core.netstandard\\1.0.119\\stub.system.data.sqlite.core.netstandard.1.0.119.nupkg.sha512",
+    "C:\\Users\\LEBORGNE\\.nuget\\packages\\system.data.sqlite.core\\1.0.119\\system.data.sqlite.core.1.0.119.nupkg.sha512"
+  ],
+  "logs": []
+}
