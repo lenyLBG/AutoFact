@@ -11,12 +11,12 @@
 using System;
 using System.Reflection;
 
-[assembly: System.Reflection.AssemblyCompanyAttribute("AutoFact")]
+[assembly: System.Reflection.AssemblyCompanyAttribute("autofact")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+e35cefd170654ee67590a34940cc9fe6b59f42c1")]
-[assembly: System.Reflection.AssemblyProductAttribute("AutoFact")]
-[assembly: System.Reflection.AssemblyTitleAttribute("AutoFact")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+88bfa8d09965cb0bc15fbac47017ee5559caa8c2")]
+[assembly: System.Reflection.AssemblyProductAttribute("autofact")]
+[assembly: System.Reflection.AssemblyTitleAttribute("autofact")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
 [assembly: System.Runtime.Versioning.TargetPlatformAttribute("Windows7.0")]
 [assembly: System.Runtime.Versioning.SupportedOSPlatformAttribute("Windows7.0")]

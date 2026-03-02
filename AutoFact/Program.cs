@@ -1,4 +1,4 @@
-namespace AutoFact
+namespace autofact
 {
     internal static class Program
     {
