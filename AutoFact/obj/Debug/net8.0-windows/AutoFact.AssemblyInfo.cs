@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("autofact")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+30ed91888b1b1f370e15254d1bd8d4f63d0be8ce")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+bb1a839f18037961d2bf439b09bad412017c94da")]
 [assembly: System.Reflection.AssemblyProductAttribute("autofact")]
 [assembly: System.Reflection.AssemblyTitleAttribute("autofact")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

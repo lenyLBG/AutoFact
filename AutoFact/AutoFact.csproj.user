@@ -1,8 +1,23 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-    <ItemGroup>
-        <Compile Update="Form1.cs">
-            <SubType>Form</SubType>
-        </Compile>
-    </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FormArticleAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FormAuth.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FormClientAdd.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FormClientEdit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Update="FormSettings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+  </ItemGroup>
 </Project>
