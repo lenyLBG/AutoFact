@@ -143,7 +143,7 @@ namespace autofact
             panelSidebar.Controls.Add(header);
 
             // ── Header contents ───────────────────────────────────────────────
-            var logo = new Panel { Size = new Size(36, 36), Location = new Point(20, 18), BackColor = Color.Transparent };
+            var logo = new Panel { Size = new Size(36, 36), Location = new Point(20, 18), BackColor = Color.Transparent, Cursor = Cursors.Hand };
             logo.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -157,15 +157,17 @@ namespace autofact
                     (36 - sz.Width) / 2f, (36 - sz.Height) / 2f);
             };
             header.Controls.Add(logo);
-            header.Controls.Add(new Label
+            var lblTitleAutoFact = new Label
             {
                 Text      = "AutoFact",
                 ForeColor = Color.White,
                 Font      = new Font("Segoe UI", 13F, FontStyle.Bold),
                 AutoSize  = true,
                 Location  = new Point(64, 15),
-                BackColor = Color.Transparent
-            });
+                BackColor = Color.Transparent,
+                Cursor    = Cursors.Hand
+            };
+            header.Controls.Add(lblTitleAutoFact);
             header.Controls.Add(new Label
             {
                 Text      = "Gestion commerciale",
@@ -199,17 +201,22 @@ namespace autofact
             };
             navArea.Controls.Add(flow);
 
+            var itemDashboard= CreateNavItem("Tableau de bord", null, "home");
             var itemDevis    = CreateNavItem("Devis",       null,                "document");
             var itemFacture  = CreateNavItem("Facturation", null,                "clipboard");
             var itemClients  = CreateNavItem("Clients",     null,                "user");
             var itemArticles = CreateNavItem("Articles",    "Produits/Services", "cube");
 
+            flow.Controls.Add(itemDashboard);
             flow.Controls.Add(itemDevis);
             flow.Controls.Add(itemFacture);
             flow.Controls.Add(itemClients);
             flow.Controls.Add(itemArticles);
 
-            SetActiveMenu(itemDevis);
+            SetActiveMenu(itemDashboard);
+
+            logo.Click += (s, e) => NavItemClicked(itemDashboard, "Tableau de bord");
+            lblTitleAutoFact.Click += (s, e) => NavItemClicked(itemDashboard, "Tableau de bord");
 
             // ── Footer contents ───────────────────────────────────────────────
             var sepBot = new Panel { Dock = DockStyle.Top, Height = 1, BackColor = Color.FromArgb(35, 255, 255, 255) };
@@ -357,6 +364,7 @@ namespace autofact
 
         private static string GetNavIcon(string key) => key switch
         {
+            "home"      => "🏠",
             "document"  => "📄",
             "clipboard" => "📋",
             "user"      => "👤",
@@ -608,10 +616,12 @@ namespace autofact
             {
                 Dock       = DockStyle.Fill,
                 BackColor  = clrMainBg,
-                AutoScroll = true,
-                Padding    = new Padding(0)
+                AutoScroll = false,
+                Padding    = new Padding(0),
+                Margin     = new Padding(0)
             };
             panelMain.Controls.Add(panelContent);
+            panelContent.BringToFront();
 
             ShowDashboard();
         }
@@ -622,6 +632,7 @@ namespace autofact
         private void ShowDashboard()
         {
             panelContent.Controls.Clear();
+            panelContent.AutoScroll = true;
 
             const int padH = 32, padV = 28;
 
@@ -654,7 +665,7 @@ namespace autofact
             const int statW = 190, statH = 96, statGap = 20;
 
             // Create cards with placeholder text — updated once DB data arrives
-            var cardCaMois    = CreateStatCard("…", "CA du mois",      "…", primaryColor,              statW, statH);
+            var cardCaMois = CreateStatCard("…", "CA du mois", "…", primaryColor, statW, statH);
             var cardDevis     = CreateStatCard("…", "Devis en cours",  "…", clrOrange,                 statW, statH);
             var cardClients   = CreateStatCard("…", "Clients actifs",  "…", clrGreen,                  statW, statH);
             var cardImpayees  = CreateStatCard("…", "Factures impayées","…",Color.FromArgb(239, 68, 68),statW, statH);
@@ -666,39 +677,61 @@ namespace autofact
                 inner.Controls.Add(statCards[i]);
             }
 
-            // Helper: update a stat card's value + trend labels (indexes 1 and 2 in Controls)
+            // Helper: update a stat card's value + trend labels
             static void SetCard(Panel card, string value, string trend)
             {
-                var labels = card.Controls.OfType<Label>().ToArray();
-                if (labels.Length >= 3) { labels[1].Text = value; labels[2].Text = trend; }
+                var valLbl = card.Controls.Find("lblValue", false).FirstOrDefault() as Label;
+                var trendLbl = card.Controls.Find("lblTrend", false).FirstOrDefault() as Label;
+                if (valLbl != null) valLbl.Text = value;
+                if (trendLbl != null) trendLbl.Text = trend;
                 card.Invalidate(true);
             }
 
             // Load real dashboard data asynchronously
             _ = Task.Run(async () =>
             {
+                string ca = "0 €";
+                string err = "";
+
                 try
                 {
                     var vm = _services.NewUrssafVM();
                     await vm.ChargerAsync();
-
-                    // Count devis en cours and factures impayées via repositories
-                    var docs    = await _services.Documents.ChargerDocumentsAsync();
-                    int devis   = docs.Count(d => d.Type   == autofact.Models.TypeDocument.Devis
-                                               && d.Statut == autofact.Models.StatutDocument.Brouillon);
-                    int impayees= docs.Count(d => d.Type   == autofact.Models.TypeDocument.Facture
-                                               && d.Statut == autofact.Models.StatutDocument.Envoye);
-                    var clients = await _services.Clients.TousAsync();
-
-                    Invoke(() =>
-                    {
-                        SetCard(cardCaMois,   vm.CaMoisCourant.ToString("N0") + " €",  "↑ vs mois préc.");
-                        SetCard(cardDevis,    devis.ToString(),                         "→ en attente");
-                        SetCard(cardClients,  clients.Count.ToString(),                 "↑ total");
-                        SetCard(cardImpayees, impayees.ToString(),                      "↓ à relancer");
-                    });
+                    ca = vm.CaMoisCourant.ToString("N0") + " €";
                 }
-                catch { /* Silently keep placeholders if DB unavailable */ }
+                catch (Exception ex) { err += ex.Message + "\n"; }
+
+                int devis = 0, impayees = 0;
+                try
+                {
+                    var docs = await _services.Documents.ChargerDocumentsAsync();
+                    devis = docs.Count(d => d.Type == autofact.Models.TypeDocument.Devis && d.Statut == autofact.Models.StatutDocument.Brouillon);
+                    impayees = docs.Count(d => d.Type == autofact.Models.TypeDocument.Facture && d.Statut == autofact.Models.StatutDocument.Envoye);
+                }
+                catch (Exception ex) { err += ex.Message + "\n"; }
+
+                int nbClients = 0;
+                try
+                {
+                    var clients = await _services.Clients.TousAsync();
+                    nbClients = clients.Count;
+                }
+                catch (Exception ex) { err += ex.Message + "\n"; }
+
+                // Force init DB if schema was missing
+                if (err.Contains("doesn't exist"))
+                {
+                    try { await db.InitializeDatabaseAsync(); } catch { }
+                }
+
+                Invoke(() =>
+                {
+                    if (cardCaMois.IsDisposed) return;
+                    SetCard(cardCaMois,   ca,                       "↑ vs mois préc.");
+                    SetCard(cardDevis,    devis.ToString(),         "→ en attente");
+                    SetCard(cardClients,  nbClients.ToString(),     "↑ total");
+                    SetCard(cardImpayees, impayees.ToString(),      "↓ à relancer");
+                });
             });
 
             // ── Quick Actions heading ─────────────────────────────────────────
@@ -742,17 +775,17 @@ namespace autofact
 
             // ── Aperçu rapide card ────────────────────────────────────────────
             const int apercuW = 380, apercuH = cardH + 34 + 30;
-            var apercu = CreateApercuCard(apercuW, apercuH);
+            //var apercu = CreateApercuCard(apercuW, apercuH);
 
             void PlaceApercu()
             {
                 int cardsEnd = padH + qaCards.Length * (cardW + cardGap);
                 int rightPos = inner.Width - apercuW - padH;
-                apercu.Location = new Point(Math.Max(cardsEnd + 24, rightPos), qaTop);
+                //apercu.Location = new Point(Math.Max(cardsEnd + 24, rightPos), qaTop);
             }
             inner.Resize += (s, e) => PlaceApercu();
             PlaceApercu();
-            inner.Controls.Add(apercu);
+            //inner.Controls.Add(apercu);
         }
 
         // ── Stat card ─────────────────────────────────────────────────────────
@@ -801,6 +834,7 @@ namespace autofact
 
             card.Controls.Add(new Label
             {
+                Name      = "lblTitle",
                 Text      = label,
                 Font      = new Font("Segoe UI", 8.5F),
                 ForeColor = clrTextLight,
@@ -810,6 +844,7 @@ namespace autofact
             });
             card.Controls.Add(new Label
             {
+                Name      = "lblValue",
                 Text      = value,
                 Font      = new Font("Segoe UI", 18F, FontStyle.Bold),
                 ForeColor = clrTextDark,
@@ -819,6 +854,7 @@ namespace autofact
             });
             card.Controls.Add(new Label
             {
+                Name      = "lblTrend",
                 Text      = trend,
                 Font      = new Font("Segoe UI", 8.5F, FontStyle.Bold),
                 ForeColor = trend.StartsWith('↑') ? clrGreen : Color.FromArgb(239, 68, 68),
@@ -918,7 +954,7 @@ namespace autofact
         }
 
         // ── Aperçu rapide card ────────────────────────────────────────────────
-        private Panel CreateApercuCard(int w, int h)
+        /*private Panel CreateApercuCard(int w, int h)
         {
             var card = new Panel { Size = new Size(w, h), BackColor = clrWhite };
             card.Paint += (s, e) =>
@@ -1048,7 +1084,7 @@ namespace autofact
                 g.DrawString(months[i], lf, lb, lr,
                     new StringFormat { Alignment = StringAlignment.Center });
             }
-        }
+        }*/
 
         // ══════════════════════════════════════════════════════════════════════
         // CLIENTS VIEW
@@ -1056,10 +1092,17 @@ namespace autofact
         private void ShowClientsView()
         {
             panelContent.Controls.Clear();
+            panelContent.AutoScroll = false;
             panelContent.Invalidate();
 
-            // Header band
-            var header = new Panel { Dock = DockStyle.Top, Height = 88, BackColor = clrWhite };
+            // Header band - docked at top
+            var header = new Panel 
+            { 
+                Dock = DockStyle.Top, 
+                Height = 88, 
+                BackColor = clrWhite,
+                Padding = new Padding(0)
+            };
             header.Paint += (s, e) =>
             {
                 using var pen = new Pen(clrBorder);
@@ -1076,7 +1119,7 @@ namespace autofact
                 Location  = new Point(28, 16)
             });
 
-            // Client count badge (dynamically updated)
+            // Client count badge
             var badge = new Panel { Size = new Size(60, 22), Location = new Point(246, 20), BackColor = Color.Transparent };
             badge.Paint += (s, e) =>
             {
@@ -1100,15 +1143,22 @@ namespace autofact
                 Location  = new Point(28, 50)
             });
 
-            // Body
-            var body = new Panel { Dock = DockStyle.Fill, BackColor = clrMainBg, Padding = new Padding(24, 16, 24, 16) };
+            // Body - fills remaining space
+            var body = new Panel 
+            { 
+                Dock = DockStyle.Fill, 
+                BackColor = clrMainBg, 
+                Padding = new Padding(24, 16, 24, 16),
+                AutoScroll = false
+            };
             panelContent.Controls.Add(body);
+            body.BringToFront();
 
             // Actions bar
             var actions = new Panel { Dock = DockStyle.Top, Height = 52, BackColor = Color.Transparent };
             body.Controls.Add(actions);
 
-            // "Ajouter client" pill button
+            // "Ajouter client" button
             btnAddClient = new Button
             {
                 Text      = "＋  Ajouter un client",
@@ -1145,7 +1195,7 @@ namespace autofact
             };
             actions.Controls.Add(btnAddClient);
 
-            // ListView wrapped in a white rounded panel
+            // ListView wrapped in rounded panel
             var listWrap = new Panel { Dock = DockStyle.Fill, BackColor = clrWhite };
             listWrap.Paint += (s, e) =>
             {
@@ -1158,6 +1208,7 @@ namespace autofact
                 e.Graphics.DrawPath(bdr, path);
             };
             body.Controls.Add(listWrap);
+            listWrap.BringToFront();
 
             lvClients = new ListView
             {
@@ -1191,7 +1242,7 @@ namespace autofact
                     TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
             };
 
-            // Owner-draw rows — alternating tint + hover highlight
+            // Owner-draw rows
             lvClients.DrawItem += (s, e) =>
             {
                 bool sel = (e.State & ListViewItemStates.Selected) != 0;
@@ -1199,7 +1250,6 @@ namespace autofact
                           : e.ItemIndex % 2 == 1 ? Color.FromArgb(251, 252, 254)
                           : clrWhite;
                 e.Graphics.FillRectangle(new SolidBrush(bg), e.Bounds);
-                // Bottom row divider
                 using var div = new Pen(Color.FromArgb(240, 242, 245));
                 e.Graphics.DrawLine(div, e.Bounds.Left, e.Bounds.Bottom - 1,
                                          e.Bounds.Right, e.Bounds.Bottom - 1);
@@ -1236,17 +1286,15 @@ namespace autofact
                 var item = lvClients.SelectedItems[0];
                 if (!int.TryParse(item.Text, out int id)) return;
 
-                string nom   = item.SubItems[1].Text;
-                string email = item.SubItems[2].Text;
-                string tel   = item.SubItems[3].Text;
-                string adr   = item.SubItems[4].Text;
-
-                using var dlg = new FormClientEdit(db, id, nom, email, tel, adr);
+                using var dlg = new FormClientEdit(db, id, item.SubItems[1].Text,
+                                                                 item.SubItems[2].Text,
+                                                                 item.SubItems[3].Text,
+                                                                 item.SubItems[4].Text);
                 if (dlg.ShowDialog(this) == DialogResult.OK && dlg.ClientModified)
                     await LoadClientsAsync();
             };
 
-            // Context menu: Edit + Delete
+            // Context menu
             var ctxMenu = new ContextMenuStrip();
             var miEdit   = new ToolStripMenuItem("✏  Modifier");
             var miDelete = new ToolStripMenuItem("🗑  Supprimer");
@@ -1259,11 +1307,10 @@ namespace autofact
                 if (lvClients.SelectedItems.Count == 0) return;
                 var item = lvClients.SelectedItems[0];
                 if (!int.TryParse(item.Text, out int id)) return;
-                string nom   = item.SubItems[1].Text;
-                string email = item.SubItems[2].Text;
-                string tel   = item.SubItems[3].Text;
-                string adr   = item.SubItems[4].Text;
-                using var dlg = new FormClientEdit(db, id, nom, email, tel, adr);
+                using var dlg = new FormClientEdit(db, id, item.SubItems[1].Text,
+                                                                 item.SubItems[2].Text,
+                                                                 item.SubItems[3].Text,
+                                                                 item.SubItems[4].Text);
                 if (dlg.ShowDialog(this) == DialogResult.OK && dlg.ClientModified)
                     await LoadClientsAsync();
             };
@@ -1293,8 +1340,6 @@ namespace autofact
             lvClients.ContextMenuStrip = ctxMenu;
             lvClients.ItemSelectionChanged += (s, e) => { lvClients.Invalidate(); badge.Invalidate(); };
             listWrap.Controls.Add(lvClients);
-            
-            panelContent.PerformLayout();
         }
 
         private async Task LoadClientsAsync()
@@ -1328,6 +1373,7 @@ namespace autofact
         private void ShowArticlesView()
         {
             panelContent.Controls.Clear();
+            panelContent.AutoScroll = false;
 
             // Header band
             var header = new Panel { Dock = DockStyle.Top, Height = 88, BackColor = clrWhite };
@@ -1372,11 +1418,13 @@ namespace autofact
             // Body
             var body = new Panel { Dock = DockStyle.Fill, BackColor = clrMainBg, Padding = new Padding(24, 16, 24, 16) };
             panelContent.Controls.Add(body);
+            body.BringToFront();
 
             // Actions bar
             var actions = new Panel { Dock = DockStyle.Top, Height = 52, BackColor = Color.Transparent };
             body.Controls.Add(actions);
 
+            // "Ajouter article" pill button
             btnAddArticle = new Button
             {
                 Text      = "＋  Ajouter un article",
@@ -1427,6 +1475,7 @@ namespace autofact
                 e.Graphics.DrawPath(bdr, path);
             };
             body.Controls.Add(listWrap);
+            listWrap.BringToFront();
 
             lvArticles = new ListView
             {
@@ -1610,6 +1659,7 @@ namespace autofact
         {
             _currentDocType = type;
             panelContent.Controls.Clear();
+            panelContent.AutoScroll = false;
 
             // ── Header ────────────────────────────────────────────────────────
             var header = new Panel { Dock = DockStyle.Top, Height = 88, BackColor = clrWhite };
@@ -1637,6 +1687,7 @@ namespace autofact
             // ── Body ──────────────────────────────────────────────────────────
             var body = new Panel { Dock = DockStyle.Fill, BackColor = clrMainBg, Padding = new Padding(24, 16, 24, 16) };
             panelContent.Controls.Add(body);
+            body.BringToFront();
 
             // ── Actions bar ───────────────────────────────────────────────────
             var actBar = new Panel { Dock = DockStyle.Top, Height = 52, BackColor = Color.Transparent };
@@ -1699,6 +1750,7 @@ namespace autofact
                 e.Graphics.DrawPath(bdr, path);
             };
             body.Controls.Add(listWrap);
+            listWrap.BringToFront();
 
             lvDocuments = new ListView
             {
@@ -1899,6 +1951,7 @@ namespace autofact
         private void ShowUrssafView()
         {
             panelContent.Controls.Clear();
+            panelContent.AutoScroll = false;
             lblPageTitle.Text = "Tableau URSSAF";
 
             // ── Header ────────────────────────────────────────────────────────
@@ -1924,6 +1977,7 @@ namespace autofact
             // ── Body (scrollable) ─────────────────────────────────────────────
             var body = new Panel { Dock = DockStyle.Fill, BackColor = clrMainBg, AutoScroll = true };
             panelContent.Controls.Add(body);
+            body.BringToFront();
 
             // Placeholder labels — updated once data loads
             var lblCaAnnuel    = MakeUrssafKpi("CA annuel",               "…", primaryColor);
@@ -2091,6 +2145,9 @@ namespace autofact
         // ══════════════════════════════════════════════════════════════════════
         private async void Form1_Load(object sender, EventArgs e)
         {
+            // Auto-update schema to ensure new tables exist
+            try { await db.InitializeDatabaseAsync(); } catch { }
+
             bool ok = await db.TestConnectionAsync();
             if (!ok)
             {
