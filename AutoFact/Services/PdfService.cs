@@ -1,246 +1,361 @@
 using autofact.Models;
-using System.Text;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
+using PdfSharp.Fonts;
 
 namespace autofact.Services
 {
     /// <summary>
-    /// G�n�re un export PDF d'un document de facturation.
-    /// Utilise une approche HTML ? PDF via <see cref="PdfExporter"/> pour rester sans
-    /// d�pendance externe lourde. Remplacer <see cref="RenderHtml"/> par QuestPDF
-    /// ou iTextSharp si un rendu plus avanc� est n�cessaire.
+    /// Generates professional PDF exports for invoices (factures), quotes (devis), and credit notes (avoirs).
+    /// Uses PdfSharp for reliable, built-in PDF generation without external dependencies.
     /// </summary>
     internal static class PdfService
     {
-        // ??????????????????????????????????????????????????????????????????????
-        // POINT D'ENTR�E PRINCIPAL
-        // ??????????????????????????????????????????????????????????????????????
+        // Initialize font resolver on first use
+        static PdfService()
+        {
+            try
+            {
+                // Use built-in font resolver for Windows
+                if (GlobalFontSettings.FontResolver == null)
+                    GlobalFontSettings.FontResolver = new PdfSharpDefaultFontResolver();
+            }
+            catch { /* Fallback if font resolver fails */ }
+        }
+        // ════════════════════════════════════════════════════════════════════════
+        // PUBLIC API
+        // ════════════════════════════════════════════════════════════════════════
 
         /// <summary>
-        /// G�n�re le PDF et le sauvegarde dans <paramref name="cheminFichier"/>.
+        /// Generates PDF and saves to file.
         /// </summary>
         public static void GenererPdf(DocumentFacturation doc,
                                       InfosEntreprise entreprise,
                                       string cheminFichier)
         {
-            string html = BuildHtml(doc, entreprise);
-            PdfExporter.ExporterHtmlVersPdf(html, cheminFichier);
+            using var pdf = CreatePdfDocument(doc, entreprise);
+            pdf.Save(cheminFichier);
         }
 
         /// <summary>
-        /// G�n�re le PDF dans un tableau d'octets (utile pour aper�u ou envoi mail).
+        /// Generates PDF as byte array (useful for preview or email).
         /// </summary>
         public static byte[] GenererPdfBytes(DocumentFacturation doc, InfosEntreprise entreprise)
         {
-            string html = BuildHtml(doc, entreprise);
-            return PdfExporter.HtmlVersBytes(html);
+            using var pdf = CreatePdfDocument(doc, entreprise);
+            using var stream = new MemoryStream();
+            pdf.Save(stream, false);
+            return stream.ToArray();
         }
 
-        // ??????????????????????????????????????????????????????????????????????
-        // CONSTRUCTION HTML
-        // ??????????????????????????????????????????????????????????????????????
+        // ════════════════════════════════════════════════════════════════════════
+        // PDF DOCUMENT CREATION
+        // ════════════════════════════════════════════════════════════════════════
 
-        private static string BuildHtml(DocumentFacturation doc, InfosEntreprise ent)
+        private static PdfDocument CreatePdfDocument(DocumentFacturation doc, InfosEntreprise ent)
         {
-            string typeLabel = doc.Type switch
+            var pdf = new PdfDocument();
+            var page = pdf.AddPage();
+            page.Width = XUnit.FromPoint(595);
+            page.Height = XUnit.FromPoint(842);
+
+            using var gfx = XGraphics.FromPdfPage(page);
+            DrawPage(gfx, page, doc, ent);
+
+            return pdf;
+        }
+
+        private static void DrawPage(XGraphics gfx, PdfPage page, DocumentFacturation doc, InfosEntreprise ent)
+        {
+            const float margin = 40;
+            float y = margin;
+            const float pageWidth = 595 - 80; // A4 width minus margins
+            const float lineHeight = 14;
+
+            // Colors (PdfSharp uses ARGB constructor: XColor(a, r, g, b) or predefined)
+            var colorPrimary = XColors.RoyalBlue;
+            var colorText = XColor.FromArgb(255, 26, 26, 46);
+            var colorTextLight = XColor.FromArgb(255, 107, 114, 128);
+            var colorBorder = XColor.FromArgb(255, 229, 231, 235);
+            var colorBg = XColor.FromArgb(255, 248, 250, 252);
+
+            // Fonts - use Arial as fallback (standard system font)
+            var fontTitle = new XFont("Arial", 22, XFontStyleEx.Bold);
+            var fontH2 = new XFont("Arial", 16, XFontStyleEx.Bold);
+            var fontH3 = new XFont("Arial", 11, XFontStyleEx.Bold);
+            var fontNormal = new XFont("Arial", 9);
+            var fontSmall = new XFont("Arial", 7.5);
+
+            var brushText = new XSolidBrush(colorText);
+            var brushLight = new XSolidBrush(colorTextLight);
+            var brushPrimary = new XSolidBrush(colorPrimary);
+            var penBorder = new XPen(colorBorder, 0.5);
+            var penPrimary = new XPen(colorPrimary, 1.5);
+            var brushBg = new XSolidBrush(colorBg);
+
+            // ─── HEADER ───────────────────────────────────────────────────────
+            // Company name
+            gfx.DrawString(ent.Nom, fontTitle, brushText, margin, y);
+            y += 28;
+
+            // Company details
+            gfx.DrawString(ent.Adresse, fontSmall, brushLight, margin, y);
+            y += lineHeight;
+            gfx.DrawString($"Tél : {ent.Telephone} — {ent.Email}", fontSmall, brushLight, margin, y);
+            y += lineHeight;
+            if (!string.IsNullOrWhiteSpace(ent.Siret))
+            {
+                gfx.DrawString($"SIRET : {ent.Siret}", fontSmall, brushLight, margin, y);
+                y += lineHeight;
+            }
+
+            y += 8;
+
+            // Document type header on right
+            string docTypeLabel = doc.Type switch
             {
                 TypeDocument.Facture => "FACTURE",
-                TypeDocument.Devis   => "DEVIS",
-                TypeDocument.Avoir   => "AVOIR",
-                _                    => "DOCUMENT"
+                TypeDocument.Devis => "DEVIS",
+                TypeDocument.Avoir => "AVOIR",
+                _ => "DOCUMENT"
             };
 
-            var sb = new StringBuilder();
-            sb.AppendLine("<!DOCTYPE html><html><head><meta charset='UTF-8'>");
-            sb.AppendLine("<style>");
-            sb.AppendLine(Css());
-            sb.AppendLine("</style></head><body>");
+            var docTypeSize = gfx.MeasureString(docTypeLabel, fontH2);
+            gfx.DrawString(docTypeLabel, fontH2, brushPrimary, 555 - docTypeSize.Width, y);
 
-            // ?? En-t�te ???????????????????????????????????????????????????????
-            sb.AppendLine("<div class='header'>");
-            sb.AppendLine($"  <div class='company'>");
-            sb.AppendLine($"    <h1>{Esc(ent.Nom)}</h1>");
-            sb.AppendLine($"    <p>{Esc(ent.Adresse)}</p>");
-            sb.AppendLine($"    <p>T�l : {Esc(ent.Telephone)} � {Esc(ent.Email)}</p>");
-            if (!string.IsNullOrWhiteSpace(ent.Siret))
-                sb.AppendLine($"    <p>SIRET : {Esc(ent.Siret)}</p>");
-            sb.AppendLine($"  </div>");
-            sb.AppendLine($"  <div class='docinfo'>");
-            sb.AppendLine($"    <h2>{typeLabel}</h2>");
-            sb.AppendLine($"    <p><strong>N� {Esc(doc.Numero)}</strong></p>");
-            sb.AppendLine($"    <p>Date : {doc.DateEmission:dd/MM/yyyy}</p>");
+            // Document number and dates
+            y += 28;
+            gfx.DrawString($"N° {doc.Numero}", fontH3, brushText, margin, y);
+            y += 16;
+
+            var rightX = 555 - 130;
+            gfx.DrawString($"Date : {doc.DateEmission:dd/MM/yyyy}", fontNormal, brushLight, rightX, y);
+            y += lineHeight;
+
             if (doc.DateEcheance.HasValue)
-                sb.AppendLine($"    <p>�ch�ance : {doc.DateEcheance:dd/MM/yyyy}</p>");
-            if (!string.IsNullOrWhiteSpace(doc.NumeroDocumentParent))
-                sb.AppendLine($"    <p>R�f. : {Esc(doc.NumeroDocumentParent)}</p>");
-            sb.AppendLine($"  </div>");
-            sb.AppendLine("</div>");
-
-            // ?? Client ????????????????????????????????????????????????????????
-            sb.AppendLine("<div class='client-block'>");
-            sb.AppendLine($"  <p class='label'>Destinataire</p>");
-            sb.AppendLine($"  <p><strong>{Esc(doc.ClientNom)}</strong></p>");
-            sb.AppendLine("</div>");
-
-            // ?? Lignes ????????????????????????????????????????????????????????
-            sb.AppendLine("<table class='lines'>");
-            sb.AppendLine("  <thead><tr>");
-            sb.AppendLine("    <th class='left'>D�signation</th>");
-            sb.AppendLine("    <th>Qt�</th>");
-            sb.AppendLine("    <th>P.U. HT</th>");
-            sb.AppendLine("    <th>Remise</th>");
-            sb.AppendLine("    <th>Montant HT</th>");
-            sb.AppendLine("  </tr></thead><tbody>");
-
-            foreach (var l in doc.Lignes)
             {
-                string remise = l.TauxRemise > 0
-                    ? $"{l.TauxRemise:F0} %{(l.CodePromoCode is not null ? $" ({Esc(l.CodePromoCode)})" : "")}"
-                    : "�";
-
-                sb.AppendLine("  <tr>");
-                sb.AppendLine($"    <td class='left'>{Esc(l.Designation)}</td>");
-                sb.AppendLine($"    <td>{l.Quantite}</td>");
-                sb.AppendLine($"    <td>{l.PrixUnitaire:F2} �</td>");
-                sb.AppendLine($"    <td>{remise}</td>");
-                sb.AppendLine($"    <td>{l.MontantHT:F2} �</td>");
-                sb.AppendLine("  </tr>");
+                gfx.DrawString($"Échéance : {doc.DateEcheance:dd/MM/yyyy}", fontNormal, brushLight, rightX, y);
+                y += lineHeight;
             }
 
-            sb.AppendLine("  </tbody></table>");
+            if (!string.IsNullOrWhiteSpace(doc.NumeroDocumentParent))
+            {
+                gfx.DrawString($"Ref. : {doc.NumeroDocumentParent}", fontNormal, brushLight, rightX, y);
+                y += lineHeight;
+            }
 
-            // ?? Totaux ????????????????????????????????????????????????????????
-            sb.AppendLine("<div class='totals'>");
-            sb.AppendLine($"  <div class='total-row'><span>Total HT</span><span>{doc.TotalHT:F2} �</span></div>");
-            sb.AppendLine($"  <div class='total-row note'>TVA non applicable � art. 293 B du CGI</div>");
-            sb.AppendLine($"  <div class='total-row grand'><span>Net � payer</span><span>{doc.TotalNet:F2} �</span></div>");
-            sb.AppendLine("</div>");
+            y += 12;
 
-            // ?? Pied de page ??????????????????????????????????????????????????
-            sb.AppendLine("<div class='footer'>");
+            // ─── RECIPIENT BLOCK ──────────────────────────────────────────────
+            var recipientRect = new XRect(margin, y, pageWidth, 40);
+            gfx.DrawRectangle(brushBg, recipientRect);
+            gfx.DrawRectangle(penBorder, recipientRect);
+            gfx.DrawString("Destinataire", fontSmall, brushLight, margin + 6, y + 4);
+            gfx.DrawString(doc.ClientNom, fontH3, brushText, margin + 6, y + 16);
+
+            y += 65;
+
+            // ─── LINE ITEMS TABLE ─────────────────────────────────────────────
+            // Column layout (proper spacing for A4 page 595pt width, margins 40pt):
+            // Usable width: 515pt (40 to 555)
+            const float col1Start = margin;      // Description starts at 40
+            const float col1Width = 245;         // Description: 40-285
+
+            const float col2Start = 285;         // Qty starts at 285
+            const float col2Width = 50;          // Qty: 285-335
+
+            const float col3Start = 335;         // P.U. HT starts at 335
+            const float col3Width = 70;          // P.U. HT: 335-405
+
+            const float col4Start = 405;         // Remise starts at 405
+            const float col4Width = 65;          // Remise: 405-470
+
+            const float col5Start = 470;         // Montant HT starts at 470
+            const float col5Width = 85;          // Montant HT: 470-555
+
+            float tableY = y;
+            float rowHeight = 20;
+
+            // Header row background
+            var headerRect = new XRect(margin, tableY, pageWidth, rowHeight);
+            gfx.DrawRectangle(brushBg, headerRect);
+            gfx.DrawRectangle(penBorder, headerRect);
+
+            // Draw vertical lines between columns
+            gfx.DrawLine(penBorder, col2Start, tableY, col2Start, tableY + rowHeight);
+            gfx.DrawLine(penBorder, col3Start, tableY, col3Start, tableY + rowHeight);
+            gfx.DrawLine(penBorder, col4Start, tableY, col4Start, tableY + rowHeight);
+            gfx.DrawLine(penBorder, col5Start, tableY, col5Start, tableY + rowHeight);
+
+            // Headers (left-aligned for text, right-aligned for numbers)
+            gfx.DrawString("Désignation", fontH3, brushLight, col1Start + 4, tableY + 12);
+            gfx.DrawString("Qté", fontH3, brushLight, col2Start + col2Width - 8, tableY + 5, XStringFormats.TopRight);
+            gfx.DrawString("P.U. HT", fontH3, brushLight, col3Start + col3Width - 4, tableY + 5, XStringFormats.TopRight);
+            gfx.DrawString("Remise", fontH3, brushLight, col4Start + col4Width - 4, tableY + 5, XStringFormats.TopRight);
+            gfx.DrawString("Montant HT", fontH3, brushLight, col5Start + col5Width - 4, tableY + 5, XStringFormats.TopRight);
+
+            tableY += rowHeight + 1;
+
+            // Data rows
+            bool altRow = false;
+            foreach (var ligne in doc.Lignes)
+            {
+                var rowRect = new XRect(margin, tableY, pageWidth, rowHeight);
+                if (altRow)
+                    gfx.DrawRectangle(new XSolidBrush(XColors.White), rowRect);
+                else
+                    gfx.DrawRectangle(new XSolidBrush(XColor.FromArgb(255, 250, 251, 252)), rowRect);
+
+                gfx.DrawRectangle(penBorder, rowRect);
+
+                // Draw vertical column separators
+                gfx.DrawLine(penBorder, col2Start, tableY, col2Start, tableY + rowHeight);
+                gfx.DrawLine(penBorder, col3Start, tableY, col3Start, tableY + rowHeight);
+                gfx.DrawLine(penBorder, col4Start, tableY, col4Start, tableY + rowHeight);
+                gfx.DrawLine(penBorder, col5Start, tableY, col5Start, tableY + rowHeight);
+
+                // Description (left-aligned, can wrap)
+                var descRect = new XRect(col1Start + 4, tableY + 0, col1Width - 8, rowHeight - 4);
+                gfx.DrawString(ligne.Designation, fontNormal, brushText, descRect, XStringFormats.TopLeft);
+
+                // Quantity (right-aligned)
+                var qtyStr = ligne.Quantite.ToString();
+                var qtyRect = new XRect(col2Start + 2, tableY + 2, col2Width - 6, rowHeight - 4);
+                gfx.DrawString(qtyStr, fontNormal, brushText, qtyRect, XStringFormats.TopRight);
+
+                // Unit price (right-aligned)
+                var priceStr = $"{ligne.PrixUnitaire:F2} €";
+                var priceRect = new XRect(col3Start + 2, tableY + 2, col3Width - 6, rowHeight - 4);
+                gfx.DrawString(priceStr, fontNormal, brushText, priceRect, XStringFormats.TopRight);
+
+                // Discount (right-aligned)
+                string remiseText = ligne.TauxRemise > 0
+                    ? $"{ligne.TauxRemise:F0} %"
+                    : "—";
+                var remiseRect = new XRect(col4Start + 2, tableY + 2, col4Width - 6, rowHeight - 4);
+                gfx.DrawString(remiseText, fontNormal, brushText, remiseRect, XStringFormats.TopRight);
+
+                // Amount HT (right-aligned, bold)
+                var amtStr = $"{ligne.MontantHT:F2} €";
+                var amtRect = new XRect(col5Start + 2, tableY + 1, col5Width - 6, rowHeight - 4);
+                gfx.DrawString(amtStr, fontNormal, brushText, amtRect, XStringFormats.TopRight);
+
+                tableY += rowHeight + 1;
+                altRow = !altRow;
+            }
+
+            y = tableY + 15;
+
+            // ─── TOTALS ───────────────────────────────────────────────────────
+            // Align with table columns for visual consistency
+            float totalsEndX = col5Start + col5Width;  // 470 + 85 = 555 (right edge of Amount column)
+
+            // Total HT
+            gfx.DrawString("Total HT", fontH3, brushText, col1Start, y);
+            gfx.DrawString($"{doc.TotalHT:F2} €", fontH3, brushText, totalsEndX - 4, y, XStringFormats.TopRight);
+            y += lineHeight + 4;
+
+            // TVA note
+            gfx.DrawString("TVA non applicable – art. 293 B du CGI", fontSmall, brushLight, col1Start, y);
+            y += lineHeight + 8;
+
+            // Grand total (Net à payer) - full width box aligned with table
+            var totalRect = new XRect(col1Start, y, totalsEndX - col1Start, 20);
+            gfx.DrawRectangle(brushBg, totalRect);
+            gfx.DrawRectangle(penPrimary, totalRect);
+
+            gfx.DrawString("Net à payer", fontH3, brushPrimary, col1Start + 4, y + 12);
+            gfx.DrawString($"{doc.TotalNet:F2} €", fontH3, brushPrimary, totalsEndX - 4, y + 5, XStringFormats.TopRight);
+
+            y += 32;
+
+            // ─── FOOTER ───────────────────────────────────────────────────────
+            gfx.DrawLine(penBorder, margin, y, margin + pageWidth, y);
+            y += 8;
+
             if (!string.IsNullOrWhiteSpace(ent.Iban))
-                sb.AppendLine($"  <p>Virement : {Esc(ent.Iban)}</p>");
-            sb.AppendLine($"  <p>Merci de votre confiance.</p>");
-            sb.AppendLine("</div>");
+            {
+                gfx.DrawString($"Virement : {ent.Iban}", fontSmall, brushLight, margin, y);
+                y += lineHeight;
+            }
 
-            sb.AppendLine("</body></html>");
-            return sb.ToString();
+            gfx.DrawString("Merci de votre confiance.", fontSmall, brushLight, margin, y);
         }
-
-        // ??????????????????????????????????????????????????????????????????????
-        // CSS INLINE
-        // ??????????????????????????????????????????????????????????????????????
-
-        private static string Css() => """
-            body { font-family: Arial, sans-serif; font-size: 12px; color: #1a1a2e; margin: 40px; }
-            .header { display: flex; justify-content: space-between; margin-bottom: 32px; }
-            .company h1 { font-size: 18px; margin: 0 0 4px; }
-            .company p, .docinfo p { margin: 2px 0; }
-            .docinfo { text-align: right; }
-            .docinfo h2 { font-size: 22px; color: #3b82f6; margin: 0 0 8px; letter-spacing: 2px; }
-            .client-block { background: #f8fafc; border-left: 4px solid #3b82f6;
-                            padding: 10px 16px; margin-bottom: 24px; }
-            .client-block .label { color: #6b7280; font-size: 10px; text-transform: uppercase;
-                                   margin: 0 0 4px; }
-            table.lines { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
-            table.lines th { background: #f1f5f9; padding: 8px 10px; text-align: center;
-                             font-size: 11px; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; }
-            table.lines th.left, table.lines td.left { text-align: left; }
-            table.lines td { padding: 7px 10px; text-align: center;
-                             border-bottom: 1px solid #f1f5f9; }
-            table.lines tr:nth-child(even) td { background: #fafafa; }
-            .totals { width: 300px; margin-left: auto; }
-            .total-row { display: flex; justify-content: space-between;
-                         padding: 4px 0; border-bottom: 1px solid #e5e7eb; }
-            .total-row.note { font-size: 10px; color: #9ca3af; border-bottom: none; }
-            .total-row.grand { font-size: 15px; font-weight: bold; color: #3b82f6;
-                               border-top: 2px solid #3b82f6; border-bottom: none; margin-top: 4px; }
-            .footer { margin-top: 48px; border-top: 1px solid #e5e7eb; padding-top: 12px;
-                      font-size: 10px; color: #9ca3af; }
-            """;
-
-        private static string Esc(string? s) =>
-            System.Net.WebUtility.HtmlEncode(s ?? string.Empty);
     }
 
-    // ??????????????????????????????????????????????????????????????????????????
-    // INFORMATIONS DE L'ENTREPRISE
-    // ??????????????????????????????????????????????????????????????????????????
-
-    /// <summary>Informations de l'autoentrepreneur, affich�es sur chaque document.</summary>
-    internal sealed class InfosEntreprise
-    {
-        public string Nom       { get; set; } = string.Empty;
-        public string Adresse   { get; set; } = string.Empty;
-        public string Telephone { get; set; } = string.Empty;
-        public string Email     { get; set; } = string.Empty;
-        public string Siret     { get; set; } = string.Empty;
-        public string Iban      { get; set; } = string.Empty;
-    }
-
-    // ??????????????????????????????????????????????????????????????????????????
-    // EXPORTEUR HTML ? PDF  (pilote WebBrowser Windows, sans d�pendance externe)
-    // ??????????????????????????????????????????????????????????????????????????
+    // ════════════════════════════════════════════════════════════════════════
+    // COMPANY INFORMATION
+    // ════════════════════════════════════════════════════════════════════════
 
     /// <summary>
-    /// Convertit un HTML en fichier PDF en utilisant le moteur d'impression
-    /// du contr�le WebBrowser Windows int�gr�.
-    /// Aucun package NuGet suppl�mentaire n'est requis.
-    /// Pour une qualit� de rendu sup�rieure, remplacer l'impl�mentation par QuestPDF.
+    /// Company information displayed on every document.
     /// </summary>
-    internal static class PdfExporter
+    internal sealed class InfosEntreprise
     {
-        public static void ExporterHtmlVersPdf(string html, string cheminFichier)
-        {
-            byte[] bytes = HtmlVersBytes(html);
-            File.WriteAllBytes(cheminFichier, bytes);
-        }
+        public string Nom { get; set; } = string.Empty;
+        public string Adresse { get; set; } = string.Empty;
+        public string Telephone { get; set; } = string.Empty;
+        public string Email { get; set; } = string.Empty;
+        public string Siret { get; set; } = string.Empty;
+        public string Iban { get; set; } = string.Empty;
+    }
 
-        public static byte[] HtmlVersBytes(string html)
+    // ════════════════════════════════════════════════════════════════════════
+    // FONT RESOLVER
+    // ════════════════════════════════════════════════════════════════════════
+
+    /// <summary>
+    /// Custom font resolver for PdfSharp to use system fonts reliably.
+    /// </summary>
+    internal sealed class PdfSharpDefaultFontResolver : IFontResolver
+    {
+        public byte[] GetFont(string faceName)
         {
-            // �crire le HTML dans un fichier temporaire
-            string tempHtml = Path.Combine(Path.GetTempPath(), $"autofact_{Guid.NewGuid():N}.html");
-            string tempPdf  = Path.Combine(Path.GetTempPath(), $"autofact_{Guid.NewGuid():N}.pdf");
+            // Map font names to standard Windows fonts
+            string mappedName = faceName switch
+            {
+                "Segoe UI" => "arial",
+                "Calibri" => "arial",
+                "Helvetica" => "arial",
+                _ => faceName.ToLower()
+            };
 
             try
             {
-                File.WriteAllText(tempHtml, html, Encoding.UTF8);
+                // Try to get from system fonts directory
+                string fontsPath = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
 
-                // Tenter une conversion via Microsoft Print to PDF (disponible Windows 10+)
-                bool ok = TryPrintToPdf(tempHtml, tempPdf);
-                if (ok && File.Exists(tempPdf))
-                    return File.ReadAllBytes(tempPdf);
-
-                // Fallback : retourner le HTML encod� si l'impression �choue
-                return Encoding.UTF8.GetBytes(html);
-            }
-            finally
-            {
-                if (File.Exists(tempHtml)) File.Delete(tempHtml);
-                if (File.Exists(tempPdf))  File.Delete(tempPdf);
-            }
-        }
-
-        private static bool TryPrintToPdf(string htmlPath, string pdfPath)
-        {
-            try
-            {
-                // Utilise wkhtmltopdf s'il est disponible sur le PATH
-                var psi = new System.Diagnostics.ProcessStartInfo
+                // Try common Windows font filenames
+                string[] candidates = new[]
                 {
-                    FileName               = "wkhtmltopdf",
-                    Arguments              = $"--quiet \"{htmlPath}\" \"{pdfPath}\"",
-                    UseShellExecute        = false,
-                    CreateNoWindow         = true,
-                    RedirectStandardError  = true
+                    Path.Combine(fontsPath, $"{mappedName}.ttf"),
+                    Path.Combine(fontsPath, $"{mappedName}bd.ttf"),
+                    Path.Combine(fontsPath, $"arial.ttf"),
+                    Path.Combine(fontsPath, $"arialbd.ttf"),
                 };
-                using var proc = System.Diagnostics.Process.Start(psi);
-                proc?.WaitForExit(15_000);
-                return File.Exists(pdfPath);
+
+                foreach (var path in candidates)
+                {
+                    if (File.Exists(path))
+                        return File.ReadAllBytes(path);
+                }
             }
-            catch
+            catch { }
+
+            // Fallback: return empty array (PdfSharp will use default)
+            return Array.Empty<byte>();
+        }
+
+        public FontResolverInfo ResolveTypeface(string familyName, bool isBold, bool isItalic)
+        {
+            // Map to standard font
+            string faceName = familyName switch
             {
-                return false;
-            }
+                "Segoe UI" or "Calibri" or "Helvetica" => "Arial",
+                _ => familyName
+            };
+
+            return new FontResolverInfo(faceName, isBold, isItalic);
         }
     }
 }

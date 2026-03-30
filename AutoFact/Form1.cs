@@ -38,6 +38,7 @@ namespace autofact
         private AppServices _services = null!;
         private int?        currentUserId;
         private string?     currentUserEmail;
+        private string      _currentViewType = "dashboard";  // Track which view is displayed
 
         // ── Client view controls ───────────────────────────────────────────────
         private ListView lvClients    = null!;
@@ -206,12 +207,14 @@ namespace autofact
             var itemFacture  = CreateNavItem("Facturation", null,                "clipboard");
             var itemClients  = CreateNavItem("Clients",     null,                "user");
             var itemArticles = CreateNavItem("Articles",    "Produits/Services", "cube");
+            var itemUrssaf   = CreateNavItem("URSSAF",      "Cotisations",       "chart");
 
             flow.Controls.Add(itemDashboard);
             flow.Controls.Add(itemDevis);
             flow.Controls.Add(itemFacture);
             flow.Controls.Add(itemClients);
             flow.Controls.Add(itemArticles);
+            flow.Controls.Add(itemUrssaf);
 
             SetActiveMenu(itemDashboard);
 
@@ -371,6 +374,7 @@ namespace autofact
             "cube"      => "📦",
             "cog"       => "⚙",
             "logout"    => "🚪",
+            "chart"     => "📊",
             _           => "•"
         };
 
@@ -446,10 +450,16 @@ namespace autofact
 
                 case "Devis":
                     ShowDocumentsView(autofact.Models.TypeDocument.Devis, "Devis", "document", clrPurple);
+                    await LoadDocumentsAsync();
                     break;
 
                 case "Facturation":
                     ShowDocumentsView(autofact.Models.TypeDocument.Facture, "Facturation", "clipboard", primaryColor);
+                    await LoadDocumentsAsync();
+                    break;
+
+                case "URSSAF":
+                    ShowUrssafView();
                     break;
 
                 default:
@@ -631,6 +641,7 @@ namespace autofact
         // ══════════════════════════════════════════════════════════════════════
         private void ShowDashboard()
         {
+            _currentViewType = "dashboard";  // Track view type
             panelContent.Controls.Clear();
             panelContent.AutoScroll = true;
 
@@ -1091,8 +1102,9 @@ namespace autofact
         // ══════════════════════════════════════════════════════════════════════
         private void ShowClientsView()
         {
+            _currentViewType = "clients";  // Track view type
             panelContent.Controls.Clear();
-            panelContent.AutoScroll = false;
+            panelContent.AutoScroll = true;
             panelContent.Invalidate();
 
             // Header band - docked at top
@@ -1242,44 +1254,10 @@ namespace autofact
                     TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
             };
 
-            // Owner-draw rows
-            lvClients.DrawItem += (s, e) =>
-            {
-                bool sel = (e.State & ListViewItemStates.Selected) != 0;
-                Color bg  = sel     ? Color.FromArgb(219, 234, 254)
-                          : e.ItemIndex % 2 == 1 ? Color.FromArgb(251, 252, 254)
-                          : clrWhite;
-                e.Graphics.FillRectangle(new SolidBrush(bg), e.Bounds);
-                using var div = new Pen(Color.FromArgb(240, 242, 245));
-                e.Graphics.DrawLine(div, e.Bounds.Left, e.Bounds.Bottom - 1,
-                                         e.Bounds.Right, e.Bounds.Bottom - 1);
-            };
-            lvClients.DrawSubItem += (s, e) =>
-            {
-                bool sel = (e.Item.Selected);
-                // First column: show a coloured dot badge for ID
-                if (e.ColumnIndex == 0)
-                {
-                    using var dotBr = new SolidBrush(sel ? primaryColor : Color.FromArgb(209, 213, 219));
-                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    int cy = e.Bounds.Top + e.Bounds.Height / 2;
-                    e.Graphics.FillEllipse(dotBr, e.Bounds.Left + 16, cy - 5, 10, 10);
-                    TextRenderer.DrawText(e.Graphics, e.SubItem.Text,
-                        new Font("Segoe UI", 8.5F, FontStyle.Bold),
-                        new Rectangle(e.Bounds.Left + 30, e.Bounds.Top, e.Bounds.Width - 32, e.Bounds.Height),
-                        sel ? primaryColor : clrTextMid,
-                        TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
-                    return;
-                }
-                Color fg = sel ? clrTextDark : (e.ColumnIndex == 1 ? clrTextDark : clrTextMid);
-                var font = e.ColumnIndex == 1 ? new Font("Segoe UI", 9.5F, FontStyle.Bold)
-                                               : new Font("Segoe UI", 9.5F);
-                TextRenderer.DrawText(e.Graphics, e.SubItem.Text, font,
-                    new Rectangle(e.Bounds.Left + 10, e.Bounds.Top, e.Bounds.Width - 12, e.Bounds.Height),
-                    fg, TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
-            };
+            // Use default WinForms rendering - it's stable and flicker-free
+            lvClients.OwnerDraw = false;
 
-            // Double-click to edit
+                // Double-click to edit
             lvClients.DoubleClick += async (s, e) =>
             {
                 if (lvClients.SelectedItems.Count == 0) return;
@@ -1372,8 +1350,9 @@ namespace autofact
         // ══════════════════════════════════════════════════════════════════════
         private void ShowArticlesView()
         {
+            _currentViewType = "articles";  // Track view type
             panelContent.Controls.Clear();
-            panelContent.AutoScroll = false;
+            panelContent.AutoScroll = true;
 
             // Header band
             var header = new Panel { Dock = DockStyle.Top, Height = 88, BackColor = clrWhite };
@@ -1508,47 +1487,12 @@ namespace autofact
 
             lvArticles.DrawItem += (s, e) =>
             {
-                bool sel  = (e.State & ListViewItemStates.Selected) != 0;
-                Color bg  = sel ? Color.FromArgb(255, 247, 237)
-                          : e.ItemIndex % 2 == 1 ? Color.FromArgb(254, 252, 249)
-                          : clrWhite;
-                e.Graphics.FillRectangle(new SolidBrush(bg), e.Bounds);
-                // Bottom row divider
-                using var div = new Pen(Color.FromArgb(240, 242, 245));
-                e.Graphics.DrawLine(div, e.Bounds.Left, e.Bounds.Bottom - 1, e.Bounds.Right, e.Bounds.Bottom - 1);
+                e.DrawDefault = true;  // Let WinForms draw everything - it's stable
             };
 
             lvArticles.DrawSubItem += (s, e) =>
             {
-                bool sel = e.Item.Selected;
-                if (e.ColumnIndex == 0)
-                {
-                    using var dotBr = new SolidBrush(sel ? clrOrange : Color.FromArgb(209, 213, 219));
-                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    int cy = e.Bounds.Top + e.Bounds.Height / 2;
-                    e.Graphics.FillEllipse(dotBr, e.Bounds.Left + 16, cy - 5, 10, 10);
-                    TextRenderer.DrawText(e.Graphics, e.SubItem.Text,
-                        new Font("Segoe UI", 8.5F, FontStyle.Bold),
-                        new Rectangle(e.Bounds.Left + 30, e.Bounds.Top, e.Bounds.Width - 32, e.Bounds.Height),
-                        sel ? clrOrange : clrTextMid,
-                        TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
-                    return;
-                }
-                // Prix column: right-aligned bold in orange
-                if (e.ColumnIndex == 3)
-                {
-                    TextRenderer.DrawText(e.Graphics, e.SubItem.Text,
-                        new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                        new Rectangle(e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 10, e.Bounds.Height),
-                        sel ? clrOrange : Color.FromArgb(161, 98, 7),
-                        TextFormatFlags.VerticalCenter | TextFormatFlags.Right);
-                    return;
-                }
-                Color fg   = sel ? clrTextDark : (e.ColumnIndex == 1 ? clrTextDark : clrTextMid);
-                var   font = e.ColumnIndex == 1 ? new Font("Segoe UI", 9.5F, FontStyle.Bold) : new Font("Segoe UI", 9.5F);
-                TextRenderer.DrawText(e.Graphics, e.SubItem.Text, font,
-                    new Rectangle(e.Bounds.Left + 10, e.Bounds.Top, e.Bounds.Width - 12, e.Bounds.Height),
-                    fg, TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
+                e.DrawDefault = true;  // Let WinForms draw everything - it's stable
             };
 
             // Double-click to edit
@@ -1657,9 +1601,10 @@ namespace autofact
         private void ShowDocumentsView(
             autofact.Models.TypeDocument type, string titre, string iconKey, Color accent)
         {
+            _currentViewType = "documents";  // Track view type
             _currentDocType = type;
             panelContent.Controls.Clear();
-            panelContent.AutoScroll = false;
+            panelContent.AutoScroll = true;
 
             // ── Header ────────────────────────────────────────────────────────
             var header = new Panel { Dock = DockStyle.Top, Height = 88, BackColor = clrWhite };
@@ -1717,13 +1662,13 @@ namespace autofact
             btnNew.MouseLeave += (s, e) => { btnNew.BackColor = accent;                            btnNew.Invalidate(); };
             btnNew.Click += async (s, e) =>
             {
-                var vm = type == autofact.Models.TypeDocument.Devis
-                    ? _services.NewDevisVM() : _services.NewFactureVM();
-                await vm.InitialiserNumeroAsync();
-                // Open FormDocument (to be built) — for now open client picker and show message
-                MessageBox.Show($"Nouveau {titre.ToLower()} — N° {vm.Numero}",
-                    titre, MessageBoxButtons.OK, MessageBoxIcon.Information);
-                await LoadDocumentsAsync();
+                using var dlg = new FormDocumentAdd(db, type);
+                if (dlg.ShowDialog(this) == DialogResult.OK && dlg.DocumentSaved)
+                {
+                    await LoadDocumentsAsync();
+                    // Refresh dashboard stats after document creation
+                    _ = RefreshDashboardStatsAsync();
+                }
             };
             actBar.Controls.Add(btnNew);
 
@@ -1777,61 +1722,8 @@ namespace autofact
                     clrTextMid, TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
             };
 
-            lvDocuments.DrawItem += (s, e) =>
-            {
-                bool sel = (e.State & ListViewItemStates.Selected) != 0;
-                Color bg = sel ? primaryLight
-                         : e.ItemIndex % 2 == 1 ? Color.FromArgb(251, 252, 254)
-                         : clrWhite;
-                e.Graphics.FillRectangle(new SolidBrush(bg), e.Bounds);
-                using var div = new Pen(Color.FromArgb(240, 242, 245));
-                e.Graphics.DrawLine(div, e.Bounds.Left, e.Bounds.Bottom - 1, e.Bounds.Right, e.Bounds.Bottom - 1);
-            };
-
-            lvDocuments.DrawSubItem += (s, e) =>
-            {
-                bool sel = e.Item.Selected;
-                // Statut column: coloured pill badge
-                if (e.ColumnIndex == 5)
-                {
-                    string statut = e.SubItem.Text;
-                    Color pillColor = statut switch
-                    {
-                        "Paye"      => clrGreen,
-                        "Envoye"    => primaryColor,
-                        "Accepte"   => clrGreen,
-                        "Annule"    => Color.FromArgb(239, 68, 68),
-                        "Refuse"    => Color.FromArgb(239, 68, 68),
-                        _           => clrTextLight
-                    };
-                    var pillR = new Rectangle(e.Bounds.Left + 6, e.Bounds.Top + 6,
-                                              e.Bounds.Width - 12, e.Bounds.Height - 12);
-                    e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-                    using var br  = new SolidBrush(Color.FromArgb(25, pillColor.R, pillColor.G, pillColor.B));
-                    using var rp  = RoundedRectStatic(pillR, 10);
-                    e.Graphics.FillPath(br, rp);
-                    TextRenderer.DrawText(e.Graphics, statut,
-                        new Font("Segoe UI", 8.5F, FontStyle.Bold),
-                        pillR, pillColor,
-                        TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
-                    return;
-                }
-                // Total HT: right-aligned bold
-                if (e.ColumnIndex == 4)
-                {
-                    TextRenderer.DrawText(e.Graphics, e.SubItem.Text,
-                        new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                        new Rectangle(e.Bounds.Left, e.Bounds.Top, e.Bounds.Width - 10, e.Bounds.Height),
-                        sel ? clrOrange : Color.FromArgb(161, 98, 7),
-                        TextFormatFlags.VerticalCenter | TextFormatFlags.Right);
-                    return;
-                }
-                Color fg   = sel ? clrTextDark : (e.ColumnIndex == 0 ? clrTextDark : clrTextMid);
-                var   font = e.ColumnIndex == 0 ? new Font("Segoe UI", 9.5F, FontStyle.Bold) : new Font("Segoe UI", 9.5F);
-                TextRenderer.DrawText(e.Graphics, e.SubItem.Text, font,
-                    new Rectangle(e.Bounds.Left + 10, e.Bounds.Top, e.Bounds.Width - 12, e.Bounds.Height),
-                    fg, TextFormatFlags.VerticalCenter | TextFormatFlags.Left);
-            };
+            // Use default WinForms rendering - it's stable and flicker-free
+            lvDocuments.OwnerDraw = false;
 
             // Context menu: Marquer payé / Créer avoir / Exporter PDF
             var ctx        = new ContextMenuStrip();
@@ -1950,6 +1842,7 @@ namespace autofact
         // ══════════════════════════════════════════════════════════════════════
         private void ShowUrssafView()
         {
+            _currentViewType = "urssaf";  // Track view type
             panelContent.Controls.Clear();
             panelContent.AutoScroll = false;
             lblPageTitle.Text = "Tableau URSSAF";
@@ -2169,6 +2062,31 @@ namespace autofact
                     }
                 }
             }
+        }
+
+        // ══════════════════════════════════════════════════════════════════════
+        // REFRESH STATS
+        // ══════════════════════════════════════════════════════════════════════
+        /// <summary>Rafraîchit les statistiques selon la vue actuellement affichée.</summary>
+        private async Task RefreshDashboardStatsAsync()
+        {
+            // Charge les stats asynchronement et met à jour la vue active
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    // Selon la vue active, rafraîchir les données appropriées
+                    if (_currentViewType == "urssaf")
+                    {
+                        Invoke(() => ShowUrssafView());
+                    }
+                    else if (_currentViewType == "dashboard")
+                    {
+                        Invoke(() => ShowDashboard());
+                    }
+                }
+                catch { }
+            });
         }
 
         // ══════════════════════════════════════════════════════════════════════

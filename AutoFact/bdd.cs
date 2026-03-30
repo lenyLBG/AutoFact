@@ -8,7 +8,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace autofact
 {
-    internal class Bdd
+    public class Bdd
     {
         private readonly string _connectionString;
 
