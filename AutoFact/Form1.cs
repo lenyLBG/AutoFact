@@ -10,43 +10,43 @@ namespace autofact
     public partial class Form1 : Form
     {
         // ── Palette ────────────────────────────────────────────────────────────
-        private readonly Color clrSidebarStart  = Color.FromArgb(17,  24,  39);   // gray-900
-        private readonly Color clrSidebarEnd    = Color.FromArgb( 9,  14,  26);   // near-black
-        private readonly Color clrAccentBar     = Color.FromArgb(59, 130, 246);   // blue-500
-        private readonly Color clrMainBg        = Color.FromArgb(244, 246, 250);  // cool gray
-        private readonly Color clrWhite         = Color.White;
-        private readonly Color clrTextDark      = Color.FromArgb(17,  24,  39);   // gray-900
-        private readonly Color clrTextMid       = Color.FromArgb(75,  85, 101);   // gray-600
-        private readonly Color clrTextLight     = Color.FromArgb(156, 163, 175);  // gray-400
-        private readonly Color clrBorder        = Color.FromArgb(229, 231, 235);  // gray-200
-        private readonly Color primaryColor     = Color.FromArgb(59, 130, 246);   // blue-500
-        private readonly Color primaryLight     = Color.FromArgb(239, 246, 255);  // blue-50
-        private readonly Color clrGreen         = Color.FromArgb(16, 185, 129);   // emerald-500
-        private readonly Color clrOrange        = Color.FromArgb(245, 158,  11);  // amber-500
-        private readonly Color clrPurple        = Color.FromArgb(139,  92, 246);  // violet-500
+        private readonly Color clrSidebarStart = Color.FromArgb(17, 24, 39);   // gray-900
+        private readonly Color clrSidebarEnd = Color.FromArgb(9, 14, 26);   // near-black
+        private readonly Color clrAccentBar = Color.FromArgb(59, 130, 246);   // blue-500
+        private readonly Color clrMainBg = Color.FromArgb(244, 246, 250);  // cool gray
+        private readonly Color clrWhite = Color.White;
+        private readonly Color clrTextDark = Color.FromArgb(17, 24, 39);   // gray-900
+        private readonly Color clrTextMid = Color.FromArgb(75, 85, 101);   // gray-600
+        private readonly Color clrTextLight = Color.FromArgb(156, 163, 175);  // gray-400
+        private readonly Color clrBorder = Color.FromArgb(229, 231, 235);  // gray-200
+        private readonly Color primaryColor = Color.FromArgb(59, 130, 246);   // blue-500
+        private readonly Color primaryLight = Color.FromArgb(239, 246, 255);  // blue-50
+        private readonly Color clrGreen = Color.FromArgb(16, 185, 129);   // emerald-500
+        private readonly Color clrOrange = Color.FromArgb(245, 158, 11);  // amber-500
+        private readonly Color clrPurple = Color.FromArgb(139, 92, 246);  // violet-500
 
         // ── Layout panels ──────────────────────────────────────────────────────
-        private Panel panelSidebar  = null!;
-        private Panel panelMain     = null!;
-        private Panel panelTopbar   = null!;
-        private Panel panelContent  = null!;
-        private Label lblPageTitle  = null!;
+        private Panel panelSidebar = null!;
+        private Panel panelMain = null!;
+        private Panel panelTopbar = null!;
+        private Panel panelContent = null!;
+        private Label lblPageTitle = null!;
 
         // ── State ──────────────────────────────────────────────────────────────
-        private Panel?      activeMenuPanel;
-        private Bdd         db = null!;
+        private Panel? activeMenuPanel;
+        private Bdd db = null!;
         private AppServices _services = null!;
-        private int?        currentUserId;
-        private string?     currentUserEmail;
-        private string      _currentViewType = "dashboard";  // Track which view is displayed
+        private int? currentUserId;
+        private string? currentUserEmail;
+        private string _currentViewType = "dashboard";  // Track which view is displayed
 
         // ── Client view controls ───────────────────────────────────────────────
-        private ListView lvClients    = null!;
-        private Button   btnAddClient = null!;
+        private ListView lvClients = null!;
+        private Button btnAddClient = null!;
 
         // ── Articles view controls ─────────────────────────────────────────────
-        private ListView lvArticles    = null!;
-        private Button   btnAddArticle = null!;
+        private ListView lvArticles = null!;
+        private Button btnAddArticle = null!;
 
         private ToolTip tooltip = null!;
 
@@ -59,13 +59,13 @@ namespace autofact
 
             DoubleBuffered = true;
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
-                     ControlStyles.ResizeRedraw          |
+                     ControlStyles.ResizeRedraw |
                      ControlStyles.AllPaintingInWmPaint, true);
 
-            tooltip          = new ToolTip();
-            db               = bdd ?? new Bdd();
-            _services        = services ?? new AppServices(db);
-            currentUserId    = authenticatedUserId;
+            tooltip = new ToolTip();
+            db = bdd ?? new Bdd();
+            _services = services ?? new AppServices(db);
+            currentUserId = authenticatedUserId;
             currentUserEmail = authenticatedUserEmail;
 
             SetupForm();
@@ -79,12 +79,12 @@ namespace autofact
         // ══════════════════════════════════════════════════════════════════════
         private void SetupForm()
         {
-            Text          = "AutoFact";
-            ClientSize    = new Size(1280, 720);   // set ClientSize, not Size, to match the designer
-            MinimumSize   = new Size(980, 640);
+            Text = "AutoFact";
+            ClientSize = new Size(1280, 720);   // set ClientSize, not Size, to match the designer
+            MinimumSize = new Size(980, 640);
             StartPosition = FormStartPosition.CenterScreen;
-            Font          = new Font("Segoe UI", 10F);
-            BackColor     = clrMainBg;
+            Font = new Font("Segoe UI", 10F);
+            BackColor = clrMainBg;
         }
 
         // ══════════════════════════════════════════════════════════════════════
@@ -151,7 +151,7 @@ namespace autofact
                 using var br = new LinearGradientBrush(logo.ClientRectangle,
                     Color.FromArgb(96, 165, 250), primaryColor, LinearGradientMode.ForwardDiagonal);
                 e.Graphics.FillEllipse(br, 0, 0, 35, 35);
-                using var f  = new Font("Segoe UI", 10F, FontStyle.Bold);
+                using var f = new Font("Segoe UI", 10F, FontStyle.Bold);
                 using var tb = new SolidBrush(Color.White);
                 SizeF sz = e.Graphics.MeasureString("AF", f);
                 e.Graphics.DrawString("AF", f, tb,
@@ -160,54 +160,54 @@ namespace autofact
             header.Controls.Add(logo);
             var lblTitleAutoFact = new Label
             {
-                Text      = "AutoFact",
+                Text = "AutoFact",
                 ForeColor = Color.White,
-                Font      = new Font("Segoe UI", 13F, FontStyle.Bold),
-                AutoSize  = true,
-                Location  = new Point(64, 15),
+                Font = new Font("Segoe UI", 13F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(64, 15),
                 BackColor = Color.Transparent,
-                Cursor    = Cursors.Hand
+                Cursor = Cursors.Hand
             };
             header.Controls.Add(lblTitleAutoFact);
             header.Controls.Add(new Label
             {
-                Text      = "Gestion commerciale",
+                Text = "Gestion commerciale",
                 ForeColor = Color.FromArgb(100, 116, 139),
-                Font      = new Font("Segoe UI", 8F),
-                AutoSize  = true,
-                Location  = new Point(65, 38),
+                Font = new Font("Segoe UI", 8F),
+                AutoSize = true,
+                Location = new Point(65, 38),
                 BackColor = Color.Transparent
             });
 
             // ── Nav section contents ──────────────────────────────────────────
             navArea.Controls.Add(new Label
             {
-                Text      = "NAVIGATION",
+                Text = "NAVIGATION",
                 ForeColor = Color.FromArgb(71, 85, 105),
-                Font      = new Font("Segoe UI", 7.5F, FontStyle.Bold),
-                AutoSize  = true,
-                Location  = new Point(20, 18),
+                Font = new Font("Segoe UI", 7.5F, FontStyle.Bold),
+                AutoSize = true,
+                Location = new Point(20, 18),
                 BackColor = Color.Transparent
             });
 
             var flow = new FlowLayoutPanel
             {
-                Left          = 0,
-                Top           = 42,
-                Width         = 260,
-                AutoSize      = true,
+                Left = 0,
+                Top = 42,
+                Width = 260,
+                AutoSize = true,
                 FlowDirection = FlowDirection.TopDown,
-                WrapContents  = false,
-                BackColor     = Color.Transparent
+                WrapContents = false,
+                BackColor = Color.Transparent
             };
             navArea.Controls.Add(flow);
 
-            var itemDashboard= CreateNavItem("Tableau de bord", null, "home");
-            var itemDevis    = CreateNavItem("Devis",       null,                "document");
-            var itemFacture  = CreateNavItem("Facturation", null,                "clipboard");
-            var itemClients  = CreateNavItem("Clients",     null,                "user");
-            var itemArticles = CreateNavItem("Articles",    "Produits/Services", "cube");
-            var itemUrssaf   = CreateNavItem("URSSAF",      "Cotisations",       "chart");
+            var itemDashboard = CreateNavItem("Tableau de bord", null, "home");
+            var itemDevis = CreateNavItem("Devis", null, "document");
+            var itemFacture = CreateNavItem("Facturation", null, "clipboard");
+            var itemClients = CreateNavItem("Clients", null, "user");
+            var itemArticles = CreateNavItem("Articles", "Produits/Services", "cube");
+            var itemUrssaf = CreateNavItem("URSSAF", "Cotisations", "chart");
 
             flow.Controls.Add(itemDashboard);
             flow.Controls.Add(itemDevis);
@@ -225,14 +225,14 @@ namespace autofact
             var sepBot = new Panel { Dock = DockStyle.Top, Height = 1, BackColor = Color.FromArgb(35, 255, 255, 255) };
             footer.Controls.Add(sepBot);
 
-            var userRow    = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = Color.Transparent };
+            var userRow = new Panel { Dock = DockStyle.Top, Height = 44, BackColor = Color.Transparent };
             var userAvatar = new Panel { Size = new Size(32, 32), Location = new Point(16, 6), BackColor = Color.Transparent };
             userAvatar.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 using var br = new SolidBrush(primaryColor);
                 e.Graphics.FillEllipse(br, 0, 0, 31, 31);
-                using var f  = new Font("Segoe UI", 9F, FontStyle.Bold);
+                using var f = new Font("Segoe UI", 9F, FontStyle.Bold);
                 string initials = currentUserEmail?.Length > 0 ? currentUserEmail[..1].ToUpper() : "U";
                 SizeF sz = e.Graphics.MeasureString(initials, f);
                 using var tb = new SolidBrush(Color.White);
@@ -242,27 +242,27 @@ namespace autofact
             userRow.Controls.Add(userAvatar);
             userRow.Controls.Add(new Label
             {
-                Text      = currentUserEmail ?? "Utilisateur",
+                Text = currentUserEmail ?? "Utilisateur",
                 ForeColor = Color.FromArgb(203, 213, 225),
-                Font      = new Font("Segoe UI", 8.5F),
-                AutoSize  = false,
-                Width     = 180,
-                Height    = 20,
-                Location  = new Point(56, 12),
+                Font = new Font("Segoe UI", 8.5F),
+                AutoSize = false,
+                Width = 180,
+                Height = 20,
+                Location = new Point(56, 12),
                 BackColor = Color.Transparent
             });
             footer.Controls.Add(userRow);
 
-            var itemSettings = CreateNavItem("Paramètres",  null, "cog");
-            var itemLogout   = CreateNavItem("Déconnexion", null, "logout");
+            var itemSettings = CreateNavItem("Paramètres", null, "cog");
+            var itemLogout = CreateNavItem("Déconnexion", null, "logout");
             var footerFlow = new FlowLayoutPanel
             {
-                Dock          = DockStyle.Top,
-                Height        = itemSettings.Height + itemLogout.Height,
+                Dock = DockStyle.Top,
+                Height = itemSettings.Height + itemLogout.Height,
                 FlowDirection = FlowDirection.TopDown,
-                WrapContents  = false,
-                BackColor     = Color.Transparent,
-                Margin        = new Padding(0)
+                WrapContents = false,
+                BackColor = Color.Transparent,
+                Margin = new Padding(0)
             };
             footerFlow.Controls.Add(itemSettings);
             footerFlow.Controls.Add(itemLogout);
@@ -277,10 +277,10 @@ namespace autofact
             int h = subtitle != null ? 52 : 44;
             var p = new Panel
             {
-                Width     = 260,
-                Height    = h,
-                Margin    = new Padding(0),
-                Cursor    = Cursors.Hand,
+                Width = 260,
+                Height = h,
+                Margin = new Padding(0),
+                Cursor = Cursors.Hand,
                 BackColor = Color.Transparent
             };
 
@@ -290,8 +290,8 @@ namespace autofact
             // Icon background circle
             var iconCircle = new Panel
             {
-                Size      = new Size(28, 28),
-                Location  = new Point(18, (h - 28) / 2),
+                Size = new Size(28, 28),
+                Location = new Point(18, (h - 28) / 2),
                 BackColor = Color.Transparent
             };
             iconCircle.Paint += (s, e) =>
@@ -303,22 +303,18 @@ namespace autofact
                     using var br = new SolidBrush(Color.FromArgb(40, 96, 165, 250));
                     e.Graphics.FillEllipse(br, 0, 0, 27, 27);
                 }
-                using var f  = new Font("Segoe UI", 13F);
-                using var tb = new SolidBrush(active ? Color.White : Color.FromArgb(148, 163, 184));
-                string icon = GetNavIcon(iconKey);
-                SizeF sz = e.Graphics.MeasureString(icon, f);
-                e.Graphics.DrawString(icon, f, tb,
-                    (28 - sz.Width) / 2f, (28 - sz.Height) / 2f);
+                Color iconColor = active ? Color.White : Color.FromArgb(148, 163, 184);
+                DrawNavIcon(e.Graphics, iconKey, iconColor, new Rectangle(0, 0, 28, 28));
             };
             p.Controls.Add(iconCircle);
 
             var lblTitle = new Label
             {
-                Text      = title,
-                Font      = new Font("Segoe UI", 10F),
+                Text = title,
+                Font = new Font("Segoe UI", 10F),
                 ForeColor = Color.FromArgb(148, 163, 184),
-                AutoSize  = true,
-                Location  = new Point(54, subtitle != null ? 8 : (h - 16) / 2),
+                AutoSize = true,
+                Location = new Point(54, subtitle != null ? 8 : (h - 16) / 2),
                 BackColor = Color.Transparent
             };
             p.Controls.Add(lblTitle);
@@ -327,11 +323,11 @@ namespace autofact
             {
                 var lblSub = new Label
                 {
-                    Text      = subtitle,
-                    Font      = new Font("Segoe UI", 7.5F),
+                    Text = subtitle,
+                    Font = new Font("Segoe UI", 7.5F),
                     ForeColor = Color.FromArgb(71, 85, 105),
-                    AutoSize  = true,
-                    Location  = new Point(54, 26),
+                    AutoSize = true,
+                    Location = new Point(54, 26),
                     BackColor = Color.Transparent
                 };
                 p.Controls.Add(lblSub);
@@ -341,7 +337,7 @@ namespace autofact
             p.Tag = (accent, lblTitle, iconCircle);
 
             void activate(object? s, EventArgs e) => NavItemClicked(p, title);
-            p.Click        += activate;
+            p.Click += activate;
             iconCircle.Click += activate;
             lblTitle.Click += activate;
 
@@ -349,7 +345,7 @@ namespace autofact
             {
                 if (p != activeMenuPanel)
                 {
-                    p.BackColor        = Color.FromArgb(18, 255, 255, 255);
+                    p.BackColor = Color.FromArgb(18, 255, 255, 255);
                     lblTitle.ForeColor = Color.FromArgb(209, 213, 219);
                 }
             };
@@ -357,7 +353,7 @@ namespace autofact
             {
                 if (p != activeMenuPanel)
                 {
-                    p.BackColor        = Color.Transparent;
+                    p.BackColor = Color.Transparent;
                     lblTitle.ForeColor = Color.FromArgb(148, 163, 184);
                 }
             };
@@ -365,26 +361,141 @@ namespace autofact
             return p;
         }
 
+        private void DrawNavIcon(Graphics g, string key, Color color, Rectangle bounds)
+        {
+            float centerX = bounds.Left + bounds.Width / 2f;
+            float centerY = bounds.Top + bounds.Height / 2f;
+
+            using var pen = new Pen(color, 1.5f) { LineJoin = System.Drawing.Drawing2D.LineJoin.Round };
+
+            switch (key)
+            {
+                case "home": // Graphique à barres (dashboard)
+                    // 3 barres ascendantes
+                    g.DrawLine(pen, centerX - 6, centerY + 4, centerX - 6, centerY - 2);
+                    g.DrawLine(pen, centerX, centerY + 4, centerX, centerY - 4);
+                    g.DrawLine(pen, centerX + 6, centerY + 4, centerX + 6, centerY - 6);
+                    // Base
+                    g.DrawLine(pen, centerX - 8, centerY + 5, centerX + 8, centerY + 5);
+                    break;
+
+                case "document": // Document avec coin plié
+                    // Corps du document
+                    g.DrawRectangle(pen, centerX - 5, centerY - 6, 10, 12);
+                    // Coin plié en haut à droite
+                    g.DrawLine(pen, centerX + 5, centerY - 6, centerX + 2, centerY - 6);
+                    g.DrawLine(pen, centerX + 5, centerY - 6, centerX + 5, centerY - 3);
+                    g.DrawLine(pen, centerX + 2, centerY - 6, centerX + 5, centerY - 3);
+                    // Lignes de texte
+                    g.DrawLine(pen, centerX - 3, centerY - 2, centerX + 3, centerY - 2);
+                    g.DrawLine(pen, centerX - 3, centerY + 1, centerX + 3, centerY + 1);
+                    g.DrawLine(pen, centerX - 3, centerY + 4, centerX + 3, centerY + 4);
+                    break;
+
+                case "clipboard": // Presse-papiers avec tableau
+                    // Pince en haut
+                    g.DrawRectangle(pen, centerX - 2, centerY - 7, 4, 2);
+                    // Corps
+                    g.DrawRectangle(pen, centerX - 5, centerY - 5, 10, 11);
+                    // Lignes du tableau
+                    g.DrawLine(pen, centerX - 3, centerY - 2, centerX + 3, centerY - 2);
+                    g.DrawLine(pen, centerX - 3, centerY + 1, centerX + 3, centerY + 1);
+                    g.DrawLine(pen, centerX - 3, centerY + 4, centerX + 3, centerY + 4);
+                    break;
+
+                case "user": // Personne / profil
+                    // Tête
+                    g.DrawEllipse(pen, centerX - 3, centerY - 5, 6, 6);
+                    // Corps
+                    g.DrawPath(pen, CreateRoundedPath(centerX - 5, centerY + 1, 10, 6, 2));
+                    break;
+
+                case "cube": // Boîte / paquet
+                    // Face avant
+                    g.DrawLine(pen, centerX - 4, centerY - 2, centerX - 4, centerY + 4);
+                    g.DrawLine(pen, centerX - 4, centerY + 4, centerX + 4, centerY + 4);
+                    g.DrawLine(pen, centerX + 4, centerY + 4, centerX + 4, centerY - 2);
+                    g.DrawLine(pen, centerX + 4, centerY - 2, centerX - 4, centerY - 2);
+                    // Face supérieure
+                    g.DrawLine(pen, centerX - 4, centerY - 2, centerX - 1, centerY - 4);
+                    g.DrawLine(pen, centerX - 1, centerY - 4, centerX + 5, centerY - 4);
+                    g.DrawLine(pen, centerX + 5, centerY - 4, centerX + 4, centerY - 2);
+                    break;
+
+                case "cog": // Engrenage / Paramètres
+                    // Cercle central
+                    g.DrawEllipse(pen, centerX - 2, centerY - 2, 4, 4);
+                    // Dents (8 dents)
+                    float radius = 5f;
+                    for (int i = 0; i < 8; i++)
+                    {
+                        float angle = (float)(i * Math.PI / 4);
+                        float x1 = centerX + (float)Math.Cos(angle) * radius;
+                        float y1 = centerY + (float)Math.Sin(angle) * radius;
+                        float x2 = centerX + (float)Math.Cos(angle) * (radius + 2);
+                        float y2 = centerY + (float)Math.Sin(angle) * (radius + 2);
+                        g.DrawLine(pen, x1, y1, x2, y2);
+                    }
+                    break;
+
+                case "logout": // Sortie / Porte
+                    // Porte
+                    g.DrawRectangle(pen, centerX - 3, centerY - 4, 4, 8);
+                    // Poignée
+                    g.DrawEllipse(pen, centerX + 1, centerY + 1, 2, 2);
+                    // Flèche de sortie
+                    g.DrawLine(pen, centerX + 3, centerY - 2, centerX + 6, centerY - 2);
+                    g.DrawLine(pen, centerX + 6, centerY - 2, centerX + 5, centerY - 3);
+                    g.DrawLine(pen, centerX + 6, centerY - 2, centerX + 5, centerY - 1);
+                    break;
+
+                case "chart": // Graphique / Tableau URSSAF
+                    // Axes
+                    g.DrawLine(pen, centerX - 5, centerY + 4, centerX - 5, centerY - 4);
+                    g.DrawLine(pen, centerX - 5, centerY + 4, centerX + 5, centerY + 4);
+                    // Points/barres du graphique
+                    g.DrawEllipse(pen, centerX - 4, centerY + 1, 2, 2);
+                    g.DrawEllipse(pen, centerX - 1, centerY - 1, 2, 2);
+                    g.DrawEllipse(pen, centerX + 2, centerY - 3, 2, 2);
+                    // Lignes de connexion
+                    g.DrawLine(pen, centerX - 3, centerY + 2, centerX, centerY);
+                    g.DrawLine(pen, centerX, centerY, centerX + 3, centerY - 2);
+                    break;
+
+                default:
+                    // Point par défaut
+                    g.FillEllipse(new SolidBrush(color), centerX - 1, centerY - 1, 2, 2);
+                    break;
+            }
+        }
+
+        private System.Drawing.Drawing2D.GraphicsPath CreateRoundedPath(float x, float y, float width, float height, float radius)
+        {
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            path.AddRectangle(new RectangleF(x, y, width, height));
+            return path;
+        }
+
         private static string GetNavIcon(string key) => key switch
         {
-            "home"      => "🏠",
-            "document"  => "📄",
+            "home" => "🏠",
+            "document" => "📄",
             "clipboard" => "📋",
-            "user"      => "👤",
-            "cube"      => "📦",
-            "cog"       => "⚙",
-            "logout"    => "🚪",
-            "chart"     => "📊",
-            _           => "•"
+            "user" => "👤",
+            "cube" => "📦",
+            "cog" => "⚙",
+            "logout" => "🚪",
+            "chart" => "📊",
+            _ => "•"
         };
 
         private void SetActiveMenu(Panel? p)
         {
             if (activeMenuPanel?.Tag is (Panel oa, Label ol, Panel oc))
             {
-                oa.Visible         = false;
-                ol.ForeColor       = Color.FromArgb(148, 163, 184);
-                ol.Font            = new Font("Segoe UI", 10F);
+                oa.Visible = false;
+                ol.ForeColor = Color.FromArgb(148, 163, 184);
+                ol.Font = new Font("Segoe UI", 10F);
                 activeMenuPanel.BackColor = Color.Transparent;
                 oc.Invalidate();
             }
@@ -394,9 +505,9 @@ namespace autofact
             if (activeMenuPanel?.Tag is (Panel na, Label nl, Panel nc))
             {
                 activeMenuPanel.BackColor = Color.FromArgb(22, 255, 255, 255);
-                na.Visible         = true;
-                nl.ForeColor       = Color.White;
-                nl.Font            = new Font("Segoe UI", 10F, FontStyle.Bold);
+                na.Visible = true;
+                nl.ForeColor = Color.White;
+                nl.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
                 nc.Invalidate();
             }
         }
@@ -432,7 +543,7 @@ namespace autofact
                     if (MessageBox.Show("Voulez-vous vous déconnecter ?", "Déconnexion",
                             MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
                     {
-                        currentUserId    = null;
+                        currentUserId = null;
                         currentUserEmail = null;
                         Application.Exit();
                     }
@@ -475,8 +586,8 @@ namespace autofact
         {
             panelTopbar = new Panel
             {
-                Dock      = DockStyle.Top,
-                Height    = 64,
+                Dock = DockStyle.Top,
+                Height = 64,
                 BackColor = clrWhite
             };
             panelTopbar.Paint += (s, e) =>
@@ -501,12 +612,12 @@ namespace autofact
             // Page title
             lblPageTitle = new Label
             {
-                Text      = "Dashboard",
-                Font      = new Font("Segoe UI", 15F, FontStyle.Bold),
+                Text = "Dashboard",
+                Font = new Font("Segoe UI", 15F, FontStyle.Bold),
                 ForeColor = clrTextDark,
-                AutoSize  = true,
+                AutoSize = true,
                 BackColor = Color.Transparent,
-                Location  = new Point(28, 20)
+                Location = new Point(28, 20)
             };
             panelTopbar.Controls.Add(lblPageTitle);
             panelTopbar.Resize += (s, e) =>
@@ -515,27 +626,27 @@ namespace autofact
             // Right-side controls container
             var rightBar = new Panel
             {
-                Height    = 64,
+                Height = 64,
                 BackColor = Color.Transparent,
-                Anchor    = AnchorStyles.Top | AnchorStyles.Right
+                Anchor = AnchorStyles.Top | AnchorStyles.Right
             };
             panelTopbar.Controls.Add(rightBar);
 
             // Search box
             var searchWrap = new Panel
             {
-                Size      = new Size(260, 36),
-                Left      = 0,
-                Top       = 14,
+                Size = new Size(260, 36),
+                Left = 0,
+                Top = 14,
                 BackColor = Color.FromArgb(248, 250, 252)
             };
             searchWrap.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 using var path = RoundedRectStatic(new Rectangle(0, 0, searchWrap.Width - 1, searchWrap.Height - 1), 8);
-                using var br   = new SolidBrush(searchWrap.BackColor);
+                using var br = new SolidBrush(searchWrap.BackColor);
                 e.Graphics.FillPath(br, path);
-                using var pen  = new Pen(clrBorder, 1f);
+                using var pen = new Pen(clrBorder, 1f);
                 e.Graphics.DrawPath(pen, path);
                 // search icon
                 using var ipen = new Pen(Color.FromArgb(156, 163, 175), 1.5f);
@@ -545,13 +656,13 @@ namespace autofact
             };
             var txtSearch = new TextBox
             {
-                BorderStyle     = BorderStyle.None,
+                BorderStyle = BorderStyle.None,
                 PlaceholderText = "Rechercher…",
-                Font            = new Font("Segoe UI", 9.5F),
-                BackColor       = Color.FromArgb(248, 250, 252),
-                ForeColor       = clrTextMid,
-                Location        = new Point(36, 9),
-                Width           = searchWrap.Width - 48
+                Font = new Font("Segoe UI", 9.5F),
+                BackColor = Color.FromArgb(248, 250, 252),
+                ForeColor = clrTextMid,
+                Location = new Point(36, 9),
+                Width = searchWrap.Width - 48
             };
             searchWrap.Controls.Add(txtSearch);
             rightBar.Controls.Add(searchWrap);
@@ -559,11 +670,11 @@ namespace autofact
             // Notification bell
             var bell = new Panel
             {
-                Size      = new Size(36, 36),
-                Left      = 272,
-                Top       = 14,
+                Size = new Size(36, 36),
+                Left = 272,
+                Top = 14,
                 BackColor = Color.Transparent,
-                Cursor    = Cursors.Hand
+                Cursor = Cursors.Hand
             };
             bell.Paint += (s, e) =>
             {
@@ -582,26 +693,26 @@ namespace autofact
             // User avatar pill
             var userPill = new Panel
             {
-                Size      = new Size(130, 36),
-                Left      = 318,
-                Top       = 14,
+                Size = new Size(130, 36),
+                Left = 318,
+                Top = 14,
                 BackColor = Color.Transparent,
-                Cursor    = Cursors.Hand
+                Cursor = Cursors.Hand
             };
             userPill.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 using var path = RoundedRectStatic(new Rectangle(0, 0, userPill.Width - 1, userPill.Height - 1), 18);
-                using var bg   = new SolidBrush(Color.FromArgb(248, 250, 252));
+                using var bg = new SolidBrush(Color.FromArgb(248, 250, 252));
                 e.Graphics.FillPath(bg, path);
-                using var bdr  = new Pen(clrBorder, 1f);
+                using var bdr = new Pen(clrBorder, 1f);
                 e.Graphics.DrawPath(bdr, path);
                 // Avatar circle
                 using var avBr = new SolidBrush(primaryColor);
                 e.Graphics.FillEllipse(avBr, 5, 4, 27, 27);
                 string initial = currentUserEmail?.Length > 0 ? currentUserEmail[..1].ToUpper() : "U";
-                using var f    = new Font("Segoe UI", 9F, FontStyle.Bold);
-                using var tb   = new SolidBrush(Color.White);
+                using var f = new Font("Segoe UI", 9F, FontStyle.Bold);
+                using var tb = new SolidBrush(Color.White);
                 SizeF sz = e.Graphics.MeasureString(initial, f);
                 e.Graphics.DrawString(initial, f, tb, 5 + (27 - sz.Width) / 2f, 4 + (27 - sz.Height) / 2f);
                 // Name
@@ -624,11 +735,11 @@ namespace autofact
             // ── Content area ──────────────────────────────────────────────────
             panelContent = new Panel
             {
-                Dock       = DockStyle.Fill,
-                BackColor  = clrMainBg,
+                Dock = DockStyle.Fill,
+                BackColor = clrMainBg,
                 AutoScroll = false,
-                Padding    = new Padding(0),
-                Margin     = new Padding(0)
+                Padding = new Padding(0),
+                Margin = new Padding(0)
             };
             panelMain.Controls.Add(panelContent);
             panelContent.BringToFront();
@@ -652,7 +763,7 @@ namespace autofact
 
             void ResizeInner()
             {
-                inner.Width  = Math.Max(panelContent.ClientSize.Width, 900);
+                inner.Width = Math.Max(panelContent.ClientSize.Width, 900);
                 const int contentH = 28 + 34 + 14 + 78 + 96 + 32 + 22 + 30 + 180 + 40;
                 inner.Height = Math.Max(panelContent.ClientSize.Height, contentH);
             }
@@ -662,13 +773,19 @@ namespace autofact
             // ── Page heading ──────────────────────────────────────────────────
             inner.Controls.Add(new Label
             {
-                Text = "Tableau de bord", Font = new Font("Segoe UI", 20F, FontStyle.Bold),
-                ForeColor = clrTextDark, AutoSize = true, Location = new Point(padH, padV)
+                Text = "Tableau de bord",
+                Font = new Font("Segoe UI", 20F, FontStyle.Bold),
+                ForeColor = clrTextDark,
+                AutoSize = true,
+                Location = new Point(padH, padV)
             });
             inner.Controls.Add(new Label
             {
-                Text = "Vue d'ensemble de votre activité", Font = new Font("Segoe UI", 10F),
-                ForeColor = clrTextMid, AutoSize = true, Location = new Point(padH, padV + 34)
+                Text = "Vue d'ensemble de votre activité",
+                Font = new Font("Segoe UI", 10F),
+                ForeColor = clrTextMid,
+                AutoSize = true,
+                Location = new Point(padH, padV + 34)
             });
 
             // ── Stat cards (placeholders refreshed after DB load) ─────────────
@@ -677,9 +794,9 @@ namespace autofact
 
             // Create cards with placeholder text — updated once DB data arrives
             var cardCaMois = CreateStatCard("…", "CA du mois", "…", primaryColor, statW, statH);
-            var cardDevis     = CreateStatCard("…", "Devis en cours",  "…", clrOrange,                 statW, statH);
-            var cardClients   = CreateStatCard("…", "Clients actifs",  "…", clrGreen,                  statW, statH);
-            var cardImpayees  = CreateStatCard("…", "Factures impayées","…",Color.FromArgb(239, 68, 68),statW, statH);
+            var cardDevis = CreateStatCard("…", "Devis en cours", "…", clrOrange, statW, statH);
+            var cardClients = CreateStatCard("…", "Clients actifs", "…", clrGreen, statW, statH);
+            var cardImpayees = CreateStatCard("…", "Factures impayées", "…", Color.FromArgb(239, 68, 68), statW, statH);
 
             Panel[] statCards = { cardCaMois, cardDevis, cardClients, cardImpayees };
             for (int i = 0; i < statCards.Length; i++)
@@ -738,10 +855,10 @@ namespace autofact
                 Invoke(() =>
                 {
                     if (cardCaMois.IsDisposed) return;
-                    SetCard(cardCaMois,   ca,                       "↑ vs mois préc.");
-                    SetCard(cardDevis,    devis.ToString(),         "→ en attente");
-                    SetCard(cardClients,  nbClients.ToString(),     "↑ total");
-                    SetCard(cardImpayees, impayees.ToString(),      "↓ à relancer");
+                    SetCard(cardCaMois, ca, "↑ vs mois préc.");
+                    SetCard(cardDevis, devis.ToString(), "→ en attente");
+                    SetCard(cardClients, nbClients.ToString(), "↑ total");
+                    SetCard(cardImpayees, impayees.ToString(), "↓ à relancer");
                 });
             });
 
@@ -749,18 +866,21 @@ namespace autofact
             int qaTop = statTop + statH + 32;
             inner.Controls.Add(new Label
             {
-                Text = "Actions rapides", Font = new Font("Segoe UI", 13F, FontStyle.Bold),
-                ForeColor = clrTextDark, AutoSize = true, Location = new Point(padH, qaTop)
+                Text = "Actions rapides",
+                Font = new Font("Segoe UI", 13F, FontStyle.Bold),
+                ForeColor = clrTextDark,
+                AutoSize = true,
+                Location = new Point(padH, qaTop)
             });
 
             // ── Quick-action cards — now wired to real actions ─────────────────
             int cardTop = qaTop + 30;
             const int cardW = 170, cardH = 180, cardGap = 18;
 
-            var qa0 = CreateQuickActionCard("Nouveau\nDevis",    "document",  primaryColor, cardW, cardH);
-            var qa1 = CreateQuickActionCard("Nouvelle\nFacture", "clipboard", clrPurple,    cardW, cardH);
-            var qa2 = CreateQuickActionCard("Ajouter\nClient",   "user",      clrGreen,     cardW, cardH);
-            var qa3 = CreateQuickActionCard("Nouvel\nArticle",   "cube",      clrOrange,    cardW, cardH);
+            var qa0 = CreateQuickActionCard("Nouveau\nDevis", "document", primaryColor, cardW, cardH);
+            var qa1 = CreateQuickActionCard("Nouvelle\nFacture", "clipboard", clrPurple, cardW, cardH);
+            var qa2 = CreateQuickActionCard("Ajouter\nClient", "user", clrGreen, cardW, cardH);
+            var qa3 = CreateQuickActionCard("Nouvel\nArticle", "cube", clrOrange, cardW, cardH);
 
             qa0.Click += (s, e) => NavItemClicked(qa0, "Devis");
             qa1.Click += (s, e) => NavItemClicked(qa1, "Facturation");
@@ -805,7 +925,7 @@ namespace autofact
             var card = new Panel { Size = new Size(w, h), BackColor = clrWhite, Cursor = Cursors.Default };
 
             bool hovered = false;
-            card.MouseEnter += (s, e) => { hovered = true;  card.Invalidate(); };
+            card.MouseEnter += (s, e) => { hovered = true; card.Invalidate(); };
             card.MouseLeave += (s, e) => { hovered = false; card.Invalidate(); };
             card.Paint += (s, e) =>
             {
@@ -815,14 +935,14 @@ namespace autofact
                 if (hovered)
                 {
                     using var shBr = new SolidBrush(Color.FromArgb(16, 0, 0, 0));
-                    using var sp   = RoundedRectStatic(new Rectangle(2, 4, w - 4, h - 4), 12);
+                    using var sp = RoundedRectStatic(new Rectangle(2, 4, w - 4, h - 4), 12);
                     g.FillPath(shBr, sp);
                 }
 
                 using var path = RoundedRectStatic(new Rectangle(0, 0, w - 1, h - 1), 12);
-                using var bg   = new SolidBrush(clrWhite);
+                using var bg = new SolidBrush(clrWhite);
                 g.FillPath(bg, path);
-                using var bdr  = new Pen(clrBorder, 1f);
+                using var bdr = new Pen(clrBorder, 1f);
                 g.DrawPath(bdr, path);
 
                 // Left accent strip
@@ -845,32 +965,32 @@ namespace autofact
 
             card.Controls.Add(new Label
             {
-                Name      = "lblTitle",
-                Text      = label,
-                Font      = new Font("Segoe UI", 8.5F),
+                Name = "lblTitle",
+                Text = label,
+                Font = new Font("Segoe UI", 8.5F),
                 ForeColor = clrTextLight,
-                AutoSize  = true,
-                Location  = new Point(14, 14),
+                AutoSize = true,
+                Location = new Point(14, 14),
                 BackColor = Color.Transparent
             });
             card.Controls.Add(new Label
             {
-                Name      = "lblValue",
-                Text      = value,
-                Font      = new Font("Segoe UI", 18F, FontStyle.Bold),
+                Name = "lblValue",
+                Text = value,
+                Font = new Font("Segoe UI", 18F, FontStyle.Bold),
                 ForeColor = clrTextDark,
-                AutoSize  = true,
-                Location  = new Point(12, 34),
+                AutoSize = true,
+                Location = new Point(12, 34),
                 BackColor = Color.Transparent
             });
             card.Controls.Add(new Label
             {
-                Name      = "lblTrend",
-                Text      = trend,
-                Font      = new Font("Segoe UI", 8.5F, FontStyle.Bold),
+                Name = "lblTrend",
+                Text = trend,
+                Font = new Font("Segoe UI", 8.5F, FontStyle.Bold),
                 ForeColor = trend.StartsWith('↑') ? clrGreen : Color.FromArgb(239, 68, 68),
-                AutoSize  = true,
-                Location  = new Point(14, h - 24),
+                AutoSize = true,
+                Location = new Point(14, h - 24),
                 BackColor = Color.Transparent
             });
 
@@ -883,7 +1003,7 @@ namespace autofact
             var card = new Panel { Size = new Size(w, h), BackColor = clrWhite, Cursor = Cursors.Hand };
 
             bool hovered = false;
-            card.MouseEnter += (s, e) => { hovered = true;  card.Invalidate(); };
+            card.MouseEnter += (s, e) => { hovered = true; card.Invalidate(); };
             card.MouseLeave += (s, e) => { hovered = false; card.Invalidate(); };
             card.Paint += (s, e) =>
             {
@@ -893,15 +1013,15 @@ namespace autofact
                 if (hovered)
                 {
                     using var shBr = new SolidBrush(Color.FromArgb(18, 0, 0, 0));
-                    using var sp   = RoundedRectStatic(new Rectangle(2, 4, w - 4, h - 4), 14);
+                    using var sp = RoundedRectStatic(new Rectangle(2, 4, w - 4, h - 4), 14);
                     g.FillPath(shBr, sp);
                 }
 
                 using var path = RoundedRectStatic(new Rectangle(0, 0, w - 1, h - 1), 14);
                 Color fill = hovered ? Color.FromArgb(252, 252, 255) : clrWhite;
-                using var bg   = new SolidBrush(fill);
+                using var bg = new SolidBrush(fill);
                 g.FillPath(bg, path);
-                using var bdr  = new Pen(hovered ? Color.FromArgb(180, accent.R, accent.G, accent.B) : clrBorder, 1f);
+                using var bdr = new Pen(hovered ? Color.FromArgb(180, accent.R, accent.G, accent.B) : clrBorder, 1f);
                 g.DrawPath(bdr, path);
             };
 
@@ -914,9 +1034,9 @@ namespace autofact
                 e.Graphics.FillEllipse(br, 0, 0, 51, 51);
                 using var pen = new Pen(Color.FromArgb(60, accent.R, accent.G, accent.B), 1.5f);
                 e.Graphics.DrawEllipse(pen, 1, 1, 49, 49);
-                using var f  = new Font("Segoe UI", 20F);
-                string icon  = GetNavIcon(iconKey);
-                SizeF sz     = e.Graphics.MeasureString(icon, f);
+                using var f = new Font("Segoe UI", 20F);
+                string icon = GetNavIcon(iconKey);
+                SizeF sz = e.Graphics.MeasureString(icon, f);
                 using var tb = new SolidBrush(accent);
                 e.Graphics.DrawString(icon, f, tb,
                     (52 - sz.Width) / 2f, (52 - sz.Height) / 2f);
@@ -925,11 +1045,11 @@ namespace autofact
 
             var lbl = new Label
             {
-                Text      = label,
-                Font      = new Font("Segoe UI", 10F, FontStyle.Bold),
+                Text = label,
+                Font = new Font("Segoe UI", 10F, FontStyle.Bold),
                 ForeColor = clrTextDark,
                 TextAlign = ContentAlignment.MiddleCenter,
-                AutoSize  = false,
+                AutoSize = false,
                 BackColor = Color.Transparent
             };
             card.Controls.Add(lbl);
@@ -941,7 +1061,7 @@ namespace autofact
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 using var br = new SolidBrush(accent);
                 e.Graphics.FillEllipse(br, 0, 0, 25, 25);
-                using var f  = new Font("Segoe UI", 13F, FontStyle.Bold);
+                using var f = new Font("Segoe UI", 13F, FontStyle.Bold);
                 using var tb = new SolidBrush(Color.White);
                 SizeF sz = e.Graphics.MeasureString("+", f);
                 e.Graphics.DrawString("+", f, tb,
@@ -952,14 +1072,14 @@ namespace autofact
             card.Resize += (s, e) =>
             {
                 iconArea.Location = new Point((w - 52) / 2, 28);
-                lbl.Size          = new Size(w - 16, 36);
-                lbl.Location      = new Point(8, 88);
-                plus.Location     = new Point(w - 34, h - 34);
+                lbl.Size = new Size(w - 16, 36);
+                lbl.Location = new Point(8, 88);
+                plus.Location = new Point(w - 34, h - 34);
             };
             iconArea.Location = new Point((w - 52) / 2, 28);
-            lbl.Size          = new Size(w - 16, 36);
-            lbl.Location      = new Point(8, 88);
-            plus.Location     = new Point(w - 34, h - 34);
+            lbl.Size = new Size(w - 16, 36);
+            lbl.Location = new Point(8, 88);
+            plus.Location = new Point(w - 34, h - 34);
 
             return card;
         }
@@ -1108,10 +1228,10 @@ namespace autofact
             panelContent.Invalidate();
 
             // Header band - docked at top
-            var header = new Panel 
-            { 
-                Dock = DockStyle.Top, 
-                Height = 88, 
+            var header = new Panel
+            {
+                Dock = DockStyle.Top,
+                Height = 88,
                 BackColor = clrWhite,
                 Padding = new Padding(0)
             };
@@ -1124,11 +1244,11 @@ namespace autofact
 
             header.Controls.Add(new Label
             {
-                Text      = "Gestion des clients",
-                Font      = new Font("Segoe UI", 18F, FontStyle.Bold),
+                Text = "Gestion des clients",
+                Font = new Font("Segoe UI", 18F, FontStyle.Bold),
                 ForeColor = clrTextDark,
-                AutoSize  = true,
-                Location  = new Point(28, 16)
+                AutoSize = true,
+                Location = new Point(28, 16)
             });
 
             // Client count badge
@@ -1148,18 +1268,18 @@ namespace autofact
 
             header.Controls.Add(new Label
             {
-                Text      = "Liste et gestion de vos clients enregistrés",
-                Font      = new Font("Segoe UI", 9.5F),
+                Text = "Liste et gestion de vos clients enregistrés",
+                Font = new Font("Segoe UI", 9.5F),
                 ForeColor = clrTextMid,
-                AutoSize  = true,
-                Location  = new Point(28, 50)
+                AutoSize = true,
+                Location = new Point(28, 50)
             });
 
             // Body - fills remaining space
-            var body = new Panel 
-            { 
-                Dock = DockStyle.Fill, 
-                BackColor = clrMainBg, 
+            var body = new Panel
+            {
+                Dock = DockStyle.Fill,
+                BackColor = clrMainBg,
                 Padding = new Padding(24, 16, 24, 16),
                 AutoScroll = false
             };
@@ -1173,16 +1293,16 @@ namespace autofact
             // "Ajouter client" button
             btnAddClient = new Button
             {
-                Text      = "＋  Ajouter un client",
-                Height    = 38,
-                Width     = 168,
-                Left      = 0,
-                Top       = 7,
+                Text = "＋  Ajouter un client",
+                Height = 38,
+                Width = 168,
+                Left = 0,
+                Top = 7,
                 BackColor = primaryColor,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                Cursor    = Cursors.Hand
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
             };
             btnAddClient.FlatAppearance.BorderSize = 0;
             btnAddClient.Paint += (s, e) =>
@@ -1198,7 +1318,7 @@ namespace autofact
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             };
             btnAddClient.MouseEnter += (s, e) => { btnAddClient.BackColor = Color.FromArgb(37, 99, 235); btnAddClient.Invalidate(); };
-            btnAddClient.MouseLeave += (s, e) => { btnAddClient.BackColor = primaryColor;                btnAddClient.Invalidate(); };
+            btnAddClient.MouseLeave += (s, e) => { btnAddClient.BackColor = primaryColor; btnAddClient.Invalidate(); };
             btnAddClient.Click += async (s, e) =>
             {
                 using var dlg = new FormClientAdd(db);
@@ -1214,9 +1334,9 @@ namespace autofact
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 using var path = RoundedRectStatic(
                     new Rectangle(0, 0, listWrap.Width - 1, listWrap.Height - 1), 12);
-                using var bg   = new SolidBrush(clrWhite);
+                using var bg = new SolidBrush(clrWhite);
                 e.Graphics.FillPath(bg, path);
-                using var bdr  = new Pen(clrBorder);
+                using var bdr = new Pen(clrBorder);
                 e.Graphics.DrawPath(bdr, path);
             };
             body.Controls.Add(listWrap);
@@ -1224,21 +1344,21 @@ namespace autofact
 
             lvClients = new ListView
             {
-                Dock           = DockStyle.Fill,
-                View           = View.Details,
-                FullRowSelect  = true,
-                GridLines      = false,
-                BorderStyle    = BorderStyle.None,
-                OwnerDraw      = true,
-                Font            = new Font("Segoe UI", 9.5F),
-                BackColor      = clrWhite,
-                HeaderStyle    = ColumnHeaderStyle.Nonclickable
+                Dock = DockStyle.Fill,
+                View = View.Details,
+                FullRowSelect = true,
+                GridLines = false,
+                BorderStyle = BorderStyle.None,
+                OwnerDraw = true,
+                Font = new Font("Segoe UI", 9.5F),
+                BackColor = clrWhite,
+                HeaderStyle = ColumnHeaderStyle.Nonclickable
             };
-            lvClients.Columns.Add("ID",         55);
-            lvClients.Columns.Add("Nom",        200);
-            lvClients.Columns.Add("Email",      200);
-            lvClients.Columns.Add("Téléphone",  130);
-            lvClients.Columns.Add("Adresse",    300);
+            lvClients.Columns.Add("ID", 55);
+            lvClients.Columns.Add("Nom", 200);
+            lvClients.Columns.Add("Email", 200);
+            lvClients.Columns.Add("Téléphone", 130);
+            lvClients.Columns.Add("Adresse", 300);
 
             // Owner-draw header
             lvClients.DrawColumnHeader += (s, e) =>
@@ -1257,7 +1377,7 @@ namespace autofact
             // Use default WinForms rendering - it's stable and flicker-free
             lvClients.OwnerDraw = false;
 
-                // Double-click to edit
+            // Double-click to edit
             lvClients.DoubleClick += async (s, e) =>
             {
                 if (lvClients.SelectedItems.Count == 0) return;
@@ -1274,7 +1394,7 @@ namespace autofact
 
             // Context menu
             var ctxMenu = new ContextMenuStrip();
-            var miEdit   = new ToolStripMenuItem("✏  Modifier");
+            var miEdit = new ToolStripMenuItem("✏  Modifier");
             var miDelete = new ToolStripMenuItem("🗑  Supprimer");
             ctxMenu.Items.Add(miEdit);
             ctxMenu.Items.Add(new ToolStripSeparator());
@@ -1365,18 +1485,18 @@ namespace autofact
 
             header.Controls.Add(new Label
             {
-                Text      = "Catalogue articles",
-                Font      = new Font("Segoe UI", 18F, FontStyle.Bold),
+                Text = "Catalogue articles",
+                Font = new Font("Segoe UI", 18F, FontStyle.Bold),
                 ForeColor = clrTextDark,
-                AutoSize  = true,
-                Location  = new Point(28, 16)
+                AutoSize = true,
+                Location = new Point(28, 16)
             });
 
             var badge = new Panel { Size = new Size(62, 22), Location = new Point(254, 20), BackColor = Color.Transparent };
             badge.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                using var br   = new SolidBrush(Color.FromArgb(255, 247, 237));
+                using var br = new SolidBrush(Color.FromArgb(255, 247, 237));
                 using var path = RoundedRectStatic(new Rectangle(0, 0, badge.Width - 1, badge.Height - 1), 11);
                 e.Graphics.FillPath(br, path);
                 TextRenderer.DrawText(e.Graphics, "articles", new Font("Segoe UI", 8F, FontStyle.Bold),
@@ -1387,11 +1507,11 @@ namespace autofact
 
             header.Controls.Add(new Label
             {
-                Text      = "Produits et services de votre catalogue tarifaire",
-                Font      = new Font("Segoe UI", 9.5F),
+                Text = "Produits et services de votre catalogue tarifaire",
+                Font = new Font("Segoe UI", 9.5F),
                 ForeColor = clrTextMid,
-                AutoSize  = true,
-                Location  = new Point(28, 50)
+                AutoSize = true,
+                Location = new Point(28, 50)
             });
 
             // Body
@@ -1406,16 +1526,16 @@ namespace autofact
             // "Ajouter article" pill button
             btnAddArticle = new Button
             {
-                Text      = "＋  Ajouter un article",
-                Height    = 38,
-                Width     = 172,
-                Left      = 0,
-                Top       = 7,
+                Text = "＋  Ajouter un article",
+                Height = 38,
+                Width = 172,
+                Left = 0,
+                Top = 7,
                 BackColor = clrOrange,
                 ForeColor = Color.White,
                 FlatStyle = FlatStyle.Flat,
-                Font      = new Font("Segoe UI", 9.5F, FontStyle.Bold),
-                Cursor    = Cursors.Hand
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
             };
             btnAddArticle.FlatAppearance.BorderSize = 0;
             btnAddArticle.Paint += (s, e) =>
@@ -1431,8 +1551,8 @@ namespace autofact
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             };
             var orangeHover = Color.FromArgb(217, 119, 6);
-            btnAddArticle.MouseEnter += (s, e) => { btnAddArticle.BackColor = orangeHover;  btnAddArticle.Invalidate(); };
-            btnAddArticle.MouseLeave += (s, e) => { btnAddArticle.BackColor = clrOrange;    btnAddArticle.Invalidate(); };
+            btnAddArticle.MouseEnter += (s, e) => { btnAddArticle.BackColor = orangeHover; btnAddArticle.Invalidate(); };
+            btnAddArticle.MouseLeave += (s, e) => { btnAddArticle.BackColor = clrOrange; btnAddArticle.Invalidate(); };
             btnAddArticle.Click += async (s, e) =>
             {
                 using var dlg = new FormArticleAdd(db);
@@ -1448,9 +1568,9 @@ namespace autofact
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 using var path = RoundedRectStatic(
                     new Rectangle(0, 0, listWrap.Width - 1, listWrap.Height - 1), 12);
-                using var bg   = new SolidBrush(clrWhite);
+                using var bg = new SolidBrush(clrWhite);
                 e.Graphics.FillPath(bg, path);
-                using var bdr  = new Pen(clrBorder);
+                using var bdr = new Pen(clrBorder);
                 e.Graphics.DrawPath(bdr, path);
             };
             body.Controls.Add(listWrap);
@@ -1458,19 +1578,19 @@ namespace autofact
 
             lvArticles = new ListView
             {
-                Dock          = DockStyle.Fill,
-                View          = View.Details,
-                FullRowSelect  = true,
-                GridLines     = false,
-                BorderStyle   = BorderStyle.None,
-                OwnerDraw     = true,
-                Font          = new Font("Segoe UI", 9.5F),
-                BackColor     = clrWhite,
-                HeaderStyle   = ColumnHeaderStyle.Nonclickable
+                Dock = DockStyle.Fill,
+                View = View.Details,
+                FullRowSelect = true,
+                GridLines = false,
+                BorderStyle = BorderStyle.None,
+                OwnerDraw = true,
+                Font = new Font("Segoe UI", 9.5F),
+                BackColor = clrWhite,
+                HeaderStyle = ColumnHeaderStyle.Nonclickable
             };
-            lvArticles.Columns.Add("ID",            55);
-            lvArticles.Columns.Add("Nom",           240);
-            lvArticles.Columns.Add("Type",          180);
+            lvArticles.Columns.Add("ID", 55);
+            lvArticles.Columns.Add("Nom", 240);
+            lvArticles.Columns.Add("Type", 180);
             lvArticles.Columns.Add("Prix unitaire", 130);
 
             lvArticles.DrawColumnHeader += (s, e) =>
@@ -1502,8 +1622,8 @@ namespace autofact
                 var item = lvArticles.SelectedItems[0];
                 if (!int.TryParse(item.Text, out int id)) return;
 
-                string nom   = item.SubItems[1].Text;
-                string type  = item.SubItems[2].Text;
+                string nom = item.SubItems[1].Text;
+                string type = item.SubItems[2].Text;
                 string prixS = item.SubItems[3].Text.Replace(" €", "").Replace(',', '.');
                 decimal.TryParse(prixS,
                     System.Globalization.NumberStyles.Number,
@@ -1517,7 +1637,7 @@ namespace autofact
 
             // Context menu: Edit + Delete
             var ctxMenu = new ContextMenuStrip();
-            var miEdit   = new ToolStripMenuItem("✏  Modifier");
+            var miEdit = new ToolStripMenuItem("✏  Modifier");
             var miDelete = new ToolStripMenuItem("🗑  Supprimer");
             ctxMenu.Items.Add(miEdit);
             ctxMenu.Items.Add(new ToolStripSeparator());
@@ -1528,8 +1648,8 @@ namespace autofact
                 if (lvArticles.SelectedItems.Count == 0) return;
                 var item = lvArticles.SelectedItems[0];
                 if (!int.TryParse(item.Text, out int id)) return;
-                string nom   = item.SubItems[1].Text;
-                string type  = item.SubItems[2].Text;
+                string nom = item.SubItems[1].Text;
+                string type = item.SubItems[2].Text;
                 string prixS = item.SubItems[3].Text.Replace(" €", "").Replace(',', '.');
                 decimal.TryParse(prixS,
                     System.Globalization.NumberStyles.Number,
@@ -1617,16 +1737,21 @@ namespace autofact
 
             header.Controls.Add(new Label
             {
-                Text = titre, Font = new Font("Segoe UI", 18F, FontStyle.Bold),
-                ForeColor = clrTextDark, AutoSize = true, Location = new Point(28, 16)
+                Text = titre,
+                Font = new Font("Segoe UI", 18F, FontStyle.Bold),
+                ForeColor = clrTextDark,
+                AutoSize = true,
+                Location = new Point(28, 16)
             });
             header.Controls.Add(new Label
             {
                 Text = type == autofact.Models.TypeDocument.Devis
                     ? "Création et suivi de vos devis"
                     : "Création et suivi de vos factures",
-                Font = new Font("Segoe UI", 9.5F), ForeColor = clrTextMid,
-                AutoSize = true, Location = new Point(28, 50)
+                Font = new Font("Segoe UI", 9.5F),
+                ForeColor = clrTextMid,
+                AutoSize = true,
+                Location = new Point(28, 50)
             });
 
             // ── Body ──────────────────────────────────────────────────────────
@@ -1643,23 +1768,29 @@ namespace autofact
 
             var btnNew = new Button
             {
-                Text = btnLabel, Height = 38, Width = 180, Left = 0,
-                BackColor = accent, ForeColor = Color.White, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold), Cursor = Cursors.Hand
+                Text = btnLabel,
+                Height = 38,
+                Width = 180,
+                Left = 0,
+                BackColor = accent,
+                ForeColor = Color.White,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9.5F, FontStyle.Bold),
+                Cursor = Cursors.Hand
             };
             btnNew.FlatAppearance.BorderSize = 0;
             btnNew.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 using var path = RoundedRectStatic(new Rectangle(0, 0, btnNew.Width - 1, btnNew.Height - 1), 19);
-                using var br   = new SolidBrush(btnNew.BackColor);
+                using var br = new SolidBrush(btnNew.BackColor);
                 e.Graphics.FillPath(br, path);
                 TextRenderer.DrawText(e.Graphics, btnNew.Text, btnNew.Font,
                     btnNew.ClientRectangle, Color.White,
                     TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter);
             };
             btnNew.MouseEnter += (s, e) => { btnNew.BackColor = ControlPaint.Dark(accent, 0.08f); btnNew.Invalidate(); };
-            btnNew.MouseLeave += (s, e) => { btnNew.BackColor = accent;                            btnNew.Invalidate(); };
+            btnNew.MouseLeave += (s, e) => { btnNew.BackColor = accent; btnNew.Invalidate(); };
             btnNew.Click += async (s, e) =>
             {
                 using var dlg = new FormDocumentAdd(db, type);
@@ -1675,9 +1806,16 @@ namespace autofact
             // Filtre URSSAF → ouvre la vue URSSAF
             var btnUrssaf = new Button
             {
-                Text = "📊  Tableau URSSAF", Height = 38, Width = 168, Left = 192, Top = 7,
-                BackColor = clrWhite, ForeColor = clrTextMid, FlatStyle = FlatStyle.Flat,
-                Font = new Font("Segoe UI", 9.5F), Cursor = Cursors.Hand
+                Text = "📊  Tableau URSSAF",
+                Height = 38,
+                Width = 168,
+                Left = 192,
+                Top = 7,
+                BackColor = clrWhite,
+                ForeColor = clrTextMid,
+                FlatStyle = FlatStyle.Flat,
+                Font = new Font("Segoe UI", 9.5F),
+                Cursor = Cursors.Hand
             };
             btnUrssaf.FlatAppearance.BorderColor = clrBorder;
             btnUrssaf.Click += (s, e) => ShowUrssafView();
@@ -1689,9 +1827,9 @@ namespace autofact
             {
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 using var path = RoundedRectStatic(new Rectangle(0, 0, listWrap.Width - 1, listWrap.Height - 1), 12);
-                using var bg   = new SolidBrush(clrWhite);
+                using var bg = new SolidBrush(clrWhite);
                 e.Graphics.FillPath(bg, path);
-                using var bdr  = new Pen(clrBorder);
+                using var bdr = new Pen(clrBorder);
                 e.Graphics.DrawPath(bdr, path);
             };
             body.Controls.Add(listWrap);
@@ -1699,17 +1837,22 @@ namespace autofact
 
             lvDocuments = new ListView
             {
-                Dock = DockStyle.Fill, View = View.Details, FullRowSelect = true,
-                GridLines = false, BorderStyle = BorderStyle.None, OwnerDraw = true,
-                Font = new Font("Segoe UI", 9.5F), BackColor = clrWhite,
+                Dock = DockStyle.Fill,
+                View = View.Details,
+                FullRowSelect = true,
+                GridLines = false,
+                BorderStyle = BorderStyle.None,
+                OwnerDraw = true,
+                Font = new Font("Segoe UI", 9.5F),
+                BackColor = clrWhite,
                 HeaderStyle = ColumnHeaderStyle.Nonclickable
             };
-            lvDocuments.Columns.Add("Numéro",   130);
-            lvDocuments.Columns.Add("Client",   200);
-            lvDocuments.Columns.Add("Date",      90);
-            lvDocuments.Columns.Add("Échéance",  90);
+            lvDocuments.Columns.Add("Numéro", 130);
+            lvDocuments.Columns.Add("Client", 200);
+            lvDocuments.Columns.Add("Date", 90);
+            lvDocuments.Columns.Add("Échéance", 90);
             lvDocuments.Columns.Add("Total HT", 110);
-            lvDocuments.Columns.Add("Statut",   110);
+            lvDocuments.Columns.Add("Statut", 110);
 
             lvDocuments.DrawColumnHeader += (s, e) =>
             {
@@ -1726,12 +1869,34 @@ namespace autofact
             lvDocuments.OwnerDraw = false;
 
             // Context menu: Marquer payé / Créer avoir / Exporter PDF
-            var ctx        = new ContextMenuStrip();
-            var miPaye     = new ToolStripMenuItem("✅  Marquer comme payée");
-            var miAvoir    = new ToolStripMenuItem("🔄  Créer un avoir");
-            var miPdf      = new ToolStripMenuItem("📄  Exporter en PDF");
-            ctx.Items.AddRange(new ToolStripItem[] { miPaye, miAvoir, new ToolStripSeparator(), miPdf });
+            var ctx = new ContextMenuStrip();
+            var miModifier = new ToolStripMenuItem("✏️  Modifier");
+            var miPaye = new ToolStripMenuItem("✅  Marquer comme payée");
+            var miAvoir = new ToolStripMenuItem("🔄  Créer un avoir");
+            var miPdf = new ToolStripMenuItem("📄  Exporter en PDF");
+            var miSupprimer = new ToolStripMenuItem("🗑️  Supprimer");
+            ctx.Items.AddRange(new ToolStripItem[] { miModifier, new ToolStripSeparator(), miPaye, miAvoir, new ToolStripSeparator(), miPdf, new ToolStripSeparator(), miSupprimer });
             lvDocuments.ContextMenuStrip = ctx;
+
+            miModifier.Click += async (s, e) =>
+            {
+                if (lvDocuments.SelectedItems.Count == 0) return;
+                if (!int.TryParse(lvDocuments.SelectedItems[0].Tag?.ToString(), out int docId)) return;
+
+                try
+                {
+                    using var dlg = new FormDocumentAdd(db, _currentDocType, docId);
+                    if (dlg.ShowDialog(this) == DialogResult.OK)
+                    {
+                        await LoadDocumentsAsync();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Erreur : " + ex.Message, "Erreur",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
 
             miPaye.Click += async (s, e) =>
             {
@@ -1766,16 +1931,16 @@ namespace autofact
 
                 // Load document with lines
                 var docs = await _services.Documents.ChargerDocumentsAsync();
-                var doc  = docs.FirstOrDefault(d => d.Id == docId);
+                var doc = docs.FirstOrDefault(d => d.Id == docId);
                 if (doc == null) return;
                 doc.Lignes = await _services.Documents.ChargerLignesAsync(docId);
 
                 using var sfd = new SaveFileDialog
                 {
-                    Title            = "Exporter la facture en PDF",
-                    Filter           = "PDF|*.pdf",
-                    FileName         = doc.Numero + ".pdf",
-                    DefaultExt       = "pdf"
+                    Title = "Exporter la facture en PDF",
+                    Filter = "PDF|*.pdf",
+                    FileName = doc.Numero + ".pdf",
+                    DefaultExt = "pdf"
                 };
                 if (sfd.ShowDialog() != DialogResult.OK) return;
 
@@ -1783,10 +1948,10 @@ namespace autofact
                 {
                     var entreprise = new autofact.Services.InfosEntreprise
                     {
-                        Nom       = "Mon Entreprise",
-                        Adresse   = "1 rue de l'Exemple, 75000 Paris",
+                        Nom = "Mon Entreprise",
+                        Adresse = "1 rue de l'Exemple, 75000 Paris",
                         Telephone = "06 00 00 00 00",
-                        Email     = currentUserEmail ?? string.Empty
+                        Email = currentUserEmail ?? string.Empty
                     };
                     autofact.Services.PdfService.GenererPdf(doc, entreprise, sfd.FileName);
                     MessageBox.Show("PDF généré : " + sfd.FileName, "Succès",
@@ -1796,6 +1961,38 @@ namespace autofact
                 {
                     MessageBox.Show("Erreur PDF : " + ex.Message, "Erreur",
                         MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            };
+
+            miSupprimer.Click += async (s, e) =>
+            {
+                if (lvDocuments.SelectedItems.Count == 0) return;
+                if (!int.TryParse(lvDocuments.SelectedItems[0].Tag?.ToString(), out int docId)) return;
+
+                var docs = await _services.Documents.ChargerDocumentsAsync();
+                var doc = docs.FirstOrDefault(d => d.Id == docId);
+                if (doc == null) return;
+
+                var result = MessageBox.Show(
+                    $"Êtes-vous sûr de vouloir supprimer le document {doc.Numero} ?\n\nCette action est irréversible.",
+                    "Confirmer la suppression",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Warning);
+
+                if (result == DialogResult.Yes)
+                {
+                    try
+                    {
+                        await _services.Documents.SupprimerDocumentAsync(docId);
+                        MessageBox.Show("Document supprimé avec succès.", "Succès",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        await LoadDocumentsAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Erreur lors de la suppression : " + ex.Message, "Erreur",
+                            MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
                 }
             };
 
@@ -1857,14 +2054,19 @@ namespace autofact
             panelContent.Controls.Add(header);
             header.Controls.Add(new Label
             {
-                Text = "Tableau de bord URSSAF", Font = new Font("Segoe UI", 18F, FontStyle.Bold),
-                ForeColor = clrTextDark, AutoSize = true, Location = new Point(28, 16)
+                Text = "Tableau de bord URSSAF",
+                Font = new Font("Segoe UI", 18F, FontStyle.Bold),
+                ForeColor = clrTextDark,
+                AutoSize = true,
+                Location = new Point(28, 16)
             });
             header.Controls.Add(new Label
             {
                 Text = "Cumul CA, cotisations et net perçu pour l'année en cours",
-                Font = new Font("Segoe UI", 9.5F), ForeColor = clrTextMid,
-                AutoSize = true, Location = new Point(28, 50)
+                Font = new Font("Segoe UI", 9.5F),
+                ForeColor = clrTextMid,
+                AutoSize = true,
+                Location = new Point(28, 50)
             });
 
             // ── Body (scrollable) ─────────────────────────────────────────────
@@ -1873,16 +2075,16 @@ namespace autofact
             body.BringToFront();
 
             // Placeholder labels — updated once data loads
-            var lblCaAnnuel    = MakeUrssafKpi("CA annuel",               "…", primaryColor);
-            var lblCotisation  = MakeUrssafKpi("Cotisations URSSAF",      "…", Color.FromArgb(239, 68, 68));
-            var lblNet         = MakeUrssafKpi("Net perçu",               "…", clrGreen);
-            var lblCaMois      = MakeUrssafKpi("CA mois courant",         "…", clrOrange);
+            var lblCaAnnuel = MakeUrssafKpi("CA annuel", "…", primaryColor);
+            var lblCotisation = MakeUrssafKpi("Cotisations URSSAF", "…", Color.FromArgb(239, 68, 68));
+            var lblNet = MakeUrssafKpi("Net perçu", "…", clrGreen);
+            var lblCaMois = MakeUrssafKpi("CA mois courant", "…", clrOrange);
 
             const int kpiW = 210, kpiH = 90, kpiGap = 20, kpiTop = 24, kpiLeft = 24;
             Panel[] kpis = { lblCaAnnuel, lblCotisation, lblNet, lblCaMois };
             for (int i = 0; i < kpis.Length; i++)
             {
-                kpis[i].Size     = new Size(kpiW, kpiH);
+                kpis[i].Size = new Size(kpiW, kpiH);
                 kpis[i].Location = new Point(kpiLeft + i * (kpiW + kpiGap), kpiTop);
                 body.Controls.Add(kpis[i]);
             }
@@ -1894,37 +2096,57 @@ namespace autofact
             {
                 var tp = new Panel
                 {
-                    Size = new Size(kpiW, 110), BackColor = clrWhite,
+                    Size = new Size(kpiW, 110),
+                    BackColor = clrWhite,
                     Location = new Point(kpiLeft + t * (kpiW + kpiGap), trimTop)
                 };
                 tp.Paint += (s, e) =>
                 {
                     e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                     using var path = RoundedRectStatic(new Rectangle(0, 0, tp.Width - 1, tp.Height - 1), 12);
-                    using var bg   = new SolidBrush(clrWhite);
+                    using var bg = new SolidBrush(clrWhite);
                     e.Graphics.FillPath(bg, path);
-                    using var bdr  = new Pen(clrBorder);
+                    using var bdr = new Pen(clrBorder);
                     e.Graphics.DrawPath(bdr, path);
                 };
                 tp.Controls.Add(new Label
                 {
-                    Text = $"T{t + 1}", Font = new Font("Segoe UI", 9F, FontStyle.Bold),
-                    ForeColor = clrTextLight, AutoSize = true, Location = new Point(14, 10), BackColor = Color.Transparent
+                    Text = $"T{t + 1}",
+                    Font = new Font("Segoe UI", 9F, FontStyle.Bold),
+                    ForeColor = clrTextLight,
+                    AutoSize = true,
+                    Location = new Point(14, 10),
+                    BackColor = Color.Transparent
                 });
                 tp.Controls.Add(new Label
                 {
-                    Name = "caVal", Text = "…", Font = new Font("Segoe UI", 14F, FontStyle.Bold),
-                    ForeColor = clrTextDark, AutoSize = true, Location = new Point(14, 28), BackColor = Color.Transparent
+                    Name = "caVal",
+                    Text = "…",
+                    Font = new Font("Segoe UI", 14F, FontStyle.Bold),
+                    ForeColor = clrTextDark,
+                    AutoSize = true,
+                    Location = new Point(14, 28),
+                    BackColor = Color.Transparent
                 });
                 tp.Controls.Add(new Label
                 {
-                    Name = "cotVal", Text = "Cot. …", Font = new Font("Segoe UI", 8.5F),
-                    ForeColor = Color.FromArgb(239, 68, 68), AutoSize = true, Location = new Point(14, 60), BackColor = Color.Transparent
+                    Name = "cotVal",
+                    Text = "Cot. …",
+                    Font = new Font("Segoe UI", 8.5F),
+                    ForeColor = Color.FromArgb(239, 68, 68),
+                    AutoSize = true,
+                    Location = new Point(14, 60),
+                    BackColor = Color.Transparent
                 });
                 tp.Controls.Add(new Label
                 {
-                    Name = "netVal", Text = "Net …", Font = new Font("Segoe UI", 8.5F),
-                    ForeColor = clrGreen, AutoSize = true, Location = new Point(14, 80), BackColor = Color.Transparent
+                    Name = "netVal",
+                    Text = "Net …",
+                    Font = new Font("Segoe UI", 8.5F),
+                    ForeColor = clrGreen,
+                    AutoSize = true,
+                    Location = new Point(14, 80),
+                    BackColor = Color.Transparent
                 });
                 trimPanels[t] = tp;
                 body.Controls.Add(tp);
@@ -1934,22 +2156,29 @@ namespace autofact
             int caTop = trimTop + 110 + 24;
             body.Controls.Add(new Label
             {
-                Text = "CA par client", Font = new Font("Segoe UI", 13F, FontStyle.Bold),
-                ForeColor = clrTextDark, AutoSize = true, Location = new Point(kpiLeft, caTop)
+                Text = "CA par client",
+                Font = new Font("Segoe UI", 13F, FontStyle.Bold),
+                ForeColor = clrTextDark,
+                AutoSize = true,
+                Location = new Point(kpiLeft, caTop)
             });
 
             var lvCaClient = new ListView
             {
                 Location = new Point(kpiLeft, caTop + 28),
-                Size     = new Size(kpiW * 4 + kpiGap * 3, 180),
-                View     = View.Details, FullRowSelect = true, GridLines = false,
-                BorderStyle = BorderStyle.FixedSingle, Font = new Font("Segoe UI", 9.5F),
-                BackColor = clrWhite, HeaderStyle = ColumnHeaderStyle.Nonclickable
+                Size = new Size(kpiW * 4 + kpiGap * 3, 180),
+                View = View.Details,
+                FullRowSelect = true,
+                GridLines = false,
+                BorderStyle = BorderStyle.FixedSingle,
+                Font = new Font("Segoe UI", 9.5F),
+                BackColor = clrWhite,
+                HeaderStyle = ColumnHeaderStyle.Nonclickable
             };
             lvCaClient.Columns.Add("Client", 280);
-            lvCaClient.Columns.Add("CA HT",  150);
+            lvCaClient.Columns.Add("CA HT", 150);
             lvCaClient.Columns.Add("Cotisations", 150);
-            lvCaClient.Columns.Add("Net perçu",   150);
+            lvCaClient.Columns.Add("Net perçu", 150);
             body.Controls.Add(lvCaClient);
 
             // Load real data
@@ -1963,19 +2192,19 @@ namespace autofact
                     Invoke(() =>
                     {
                         // Update KPI cards
-                        SetUrssafKpi(lblCaAnnuel,   vm.CaAnnuel.ToString("N2")           + " €");
+                        SetUrssafKpi(lblCaAnnuel, vm.CaAnnuel.ToString("N2") + " €");
                         SetUrssafKpi(lblCotisation, vm.CotisationAnnuelle.ToString("N2") + " €");
-                        SetUrssafKpi(lblNet,        vm.NetAnnuel.ToString("N2")           + " €");
-                        SetUrssafKpi(lblCaMois,     vm.CaMoisCourant.ToString("N2")       + " €");
+                        SetUrssafKpi(lblNet, vm.NetAnnuel.ToString("N2") + " €");
+                        SetUrssafKpi(lblCaMois, vm.CaMoisCourant.ToString("N2") + " €");
 
                         // Update trimestre panels
                         for (int t = 0; t < 4 && t < vm.Trimestres.Length; t++)
                         {
-                            var tr     = vm.Trimestres[t];
+                            var tr = vm.Trimestres[t];
                             var labels = trimPanels[t].Controls.OfType<Label>().ToArray();
                             if (labels.Length >= 4)
                             {
-                                labels[1].Text = tr.CaBrut.ToString("N2")    + " €";
+                                labels[1].Text = tr.CaBrut.ToString("N2") + " €";
                                 labels[2].Text = "Cot. " + tr.Cotisation.ToString("N2") + " €";
                                 labels[3].Text = "Net " + tr.NetPercu.ToString("N2") + " €";
                             }
@@ -2004,25 +2233,33 @@ namespace autofact
             {
                 e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
                 using var path = RoundedRectStatic(new Rectangle(0, 0, p.Width - 1, p.Height - 1), 12);
-                using var bg   = new SolidBrush(clrWhite);
+                using var bg = new SolidBrush(clrWhite);
                 e.Graphics.FillPath(bg, path);
-                using var bdr  = new Pen(clrBorder);
+                using var bdr = new Pen(clrBorder);
                 e.Graphics.DrawPath(bdr, path);
-                using var acc  = new SolidBrush(accent);
-                using var acP  = RoundedRectStatic(new Rectangle(0, 0, 4, p.Height - 1), 2);
+                using var acc = new SolidBrush(accent);
+                using var acP = RoundedRectStatic(new Rectangle(0, 0, 4, p.Height - 1), 2);
                 e.Graphics.FillPath(acc, acP);
             };
             p.Controls.Add(new Label
             {
-                Name = "lbl", Text = label, Font = new Font("Segoe UI", 8.5F),
-                ForeColor = clrTextLight, AutoSize = true,
-                Location = new Point(14, 12), BackColor = Color.Transparent
+                Name = "lbl",
+                Text = label,
+                Font = new Font("Segoe UI", 8.5F),
+                ForeColor = clrTextLight,
+                AutoSize = true,
+                Location = new Point(14, 12),
+                BackColor = Color.Transparent
             });
             p.Controls.Add(new Label
             {
-                Name = "val", Text = value, Font = new Font("Segoe UI", 18F, FontStyle.Bold),
-                ForeColor = clrTextDark, AutoSize = true,
-                Location = new Point(12, 30), BackColor = Color.Transparent
+                Name = "val",
+                Text = value,
+                Font = new Font("Segoe UI", 18F, FontStyle.Bold),
+                ForeColor = clrTextDark,
+                AutoSize = true,
+                Location = new Point(12, 30),
+                BackColor = Color.Transparent
             });
             return p;
         }
@@ -2101,12 +2338,17 @@ namespace autofact
             radius = Math.Max(1, Math.Min(radius, Math.Min(r.Width, r.Height) / 2));
             var path = new GraphicsPath();
             int d = radius * 2;
-            path.AddArc(r.Left,      r.Top,        d, d, 180, 90);
-            path.AddArc(r.Right - d, r.Top,        d, d, 270, 90);
-            path.AddArc(r.Right - d, r.Bottom - d, d, d,   0, 90);
-            path.AddArc(r.Left,      r.Bottom - d, d, d,  90, 90);
+            path.AddArc(r.Left, r.Top, d, d, 180, 90);
+            path.AddArc(r.Right - d, r.Top, d, d, 270, 90);
+            path.AddArc(r.Right - d, r.Bottom - d, d, d, 0, 90);
+            path.AddArc(r.Left, r.Bottom - d, d, d, 90, 90);
             path.CloseFigure();
             return path;
+        }
+
+        private void Form1_Load_1(object sender, EventArgs e)
+        {
+
         }
     }
 }

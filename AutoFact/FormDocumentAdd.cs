@@ -32,6 +32,8 @@ namespace autofact
 
         // State
         public bool DocumentSaved { get; private set; }
+        private int? _documentIdToEdit = null;
+        private bool _isEditMode = false;
 
         // ══════════════════════════════════════════════════════════════════════
         public FormDocumentAdd(Bdd db, TypeDocument docType)
@@ -42,6 +44,7 @@ namespace autofact
             _services = new AppServices(db);
             _docType = docType;
             DocumentSaved = false;
+            _isEditMode = false;
 
             DoubleBuffered = true;
             SetStyle(ControlStyles.OptimizedDoubleBuffer |
@@ -49,6 +52,32 @@ namespace autofact
                      ControlStyles.AllPaintingInWmPaint, true);
 
             Text = docType == TypeDocument.Facture ? "Nouvelle Facture" : "Nouveau Devis";
+            ClientSize = new Size(900, 650);
+            Font = new Font("Segoe UI", 10F);
+            BackColor = Color.FromArgb(244, 246, 250);
+            StartPosition = FormStartPosition.CenterParent;
+
+            BuildUI();
+        }
+
+        /// <summary>Constructeur pour modifier un document existant.</summary>
+        public FormDocumentAdd(Bdd db, TypeDocument docType, int documentId)
+        {
+            InitializeComponent();
+
+            _db = db;
+            _services = new AppServices(db);
+            _docType = docType;
+            _documentIdToEdit = documentId;
+            _isEditMode = true;
+            DocumentSaved = false;
+
+            DoubleBuffered = true;
+            SetStyle(ControlStyles.OptimizedDoubleBuffer |
+                     ControlStyles.ResizeRedraw |
+                     ControlStyles.AllPaintingInWmPaint, true);
+
+            Text = docType == TypeDocument.Facture ? "Modifier Facture" : "Modifier Devis";
             ClientSize = new Size(900, 650);
             Font = new Font("Segoe UI", 10F);
             BackColor = Color.FromArgb(244, 246, 250);
@@ -73,7 +102,9 @@ namespace autofact
 
             var lblTitle = new Label
             {
-                Text = _docType == TypeDocument.Facture ? "Nouvelle Facture" : "Nouveau Devis",
+                Text = _isEditMode 
+                    ? (_docType == TypeDocument.Facture ? "Modifier Facture" : "Modifier Devis")
+                    : (_docType == TypeDocument.Facture ? "Nouvelle Facture" : "Nouveau Devis"),
                 Font = new Font("Segoe UI", 16F, FontStyle.Bold),
                 ForeColor = Color.FromArgb(17, 24, 39),
                 AutoSize = true,
@@ -548,14 +579,48 @@ namespace autofact
                     colArticle.ValueMember = "Id";
                 }
 
-                // Generate next document number
+                // Generate or load document
                 if (_viewModel == null)
                     _viewModel = _docType == TypeDocument.Facture ? _services.NewFactureVM() : _services.NewDevisVM();
 
-                await _viewModel.InitialiserNumeroAsync();
+                if (_isEditMode && _documentIdToEdit.HasValue)
+                {
+                    // Load existing document
+                    await _viewModel.ChargerAsync(_documentIdToEdit.Value);
+
+                    // Bind data to UI
+                    cmbClient.SelectedValue = _viewModel.ClientId;
+                    dtEmission.Value = _viewModel.DateEmission;
+                    if (_viewModel.DateEcheance.HasValue)
+                        dtEcheance.Value = _viewModel.DateEcheance.Value;
+
+                    // Populate lines in DataGridView
+                    dgvLignes.Rows.Clear();
+                    foreach (var ligne in _viewModel.Lignes)
+                    {
+                        int rowIdx = dgvLignes.Rows.Add();
+                        dgvLignes.Rows[rowIdx].Cells[0].Value = ligne.PrestationId;
+                        dgvLignes.Rows[rowIdx].Cells[1].Value = ligne.Designation;
+                        dgvLignes.Rows[rowIdx].Cells[2].Value = ligne.Quantite;
+                        dgvLignes.Rows[rowIdx].Cells[3].Value = ligne.PrixUnitaire;
+                        dgvLignes.Rows[rowIdx].Cells[4].Value = ligne.TauxRemise;
+                        dgvLignes.Rows[rowIdx].Tag = ligne.Id; // Store ligne ID
+                    }
+                }
+                else
+                {
+                    // New document
+                    await _viewModel.InitialiserNumeroAsync();
+                }
+
                 var lblNum = Controls.Find("lblNumero", true).FirstOrDefault() as Label;
                 if (lblNum != null)
                     lblNum.Text = _viewModel.Numero;
+
+                // Update total
+                var lblTotal = Controls.Find("lblTotalValue", true).FirstOrDefault() as Label;
+                if (lblTotal != null)
+                    lblTotal.Text = _viewModel.TotalHT.ToString("F2") + " €";
             }
             catch (Exception ex)
             {

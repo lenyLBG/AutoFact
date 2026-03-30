@@ -32,11 +32,11 @@
             // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.None;   // prevent font-DPI scaling from distorting manual layouts
+            AutoScaleMode = AutoScaleMode.None;
             ClientSize = new Size(1280, 720);
             Name = "Form1";
             Text = "AutoFact";
+            Load += Form1_Load_1;
             ResumeLayout(false);
             // Load is wired in the constructor — do NOT add it here to avoid duplicate firing
         }
