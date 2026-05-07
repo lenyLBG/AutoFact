@@ -10,8 +10,10 @@ using autofact.ViewModels;
 
 namespace autofact
 {
+    /// <summary>Formulaire de création/modification de factures et devis.</summary>
     internal partial class FormDocumentAdd : Form
     {
+        // ── Services et données ────────────────────────────────────────────
         private readonly Bdd _db;
         private readonly AppServices _services;
         private readonly TypeDocument _docType;
@@ -19,7 +21,7 @@ namespace autofact
         private List<Prestation> _prestations = new();
         private List<Client> _clients = new();
 
-        // UI Controls
+        // ── UI Controls ────────────────────────────────────────────────────
         private ComboBox cmbClient = null!;
         private DateTimePicker dtEmission = null!;
         private DateTimePicker dtEcheance = null!;
@@ -30,12 +32,16 @@ namespace autofact
         private Button btnSave = null!;
         private Button btnCancel = null!;
 
-        // State
+        // ── État ───────────────────────────────────────────────────────────
         public bool DocumentSaved { get; private set; }
         private int? _documentIdToEdit = null;
         private bool _isEditMode = false;
 
         // ══════════════════════════════════════════════════════════════════════
+        // CONSTRUCTEURS
+        // ══════════════════════════════════════════════════════════════════════
+
+        /// <summary>Constructeur pour créer un nouveau document.</summary>
         public FormDocumentAdd(Bdd db, TypeDocument docType)
         {
             InitializeComponent();
@@ -86,12 +92,16 @@ namespace autofact
             BuildUI();
         }
 
+        // ══════════════════════════════════════════════════════════════════════
+        // INTERFACE UTILISATEUR
+        // ══════════════════════════════════════════════════════════════════════
+
         private void BuildUI()
         {
             var mainPanel = new Panel { Dock = DockStyle.Fill, BackColor = Color.White };
             Controls.Add(mainPanel);
 
-            // ── Header ─────────────────────────────────────────────────────
+            // ── En-tête du formulaire ───────────────────────────────────────
             var header = new Panel { Dock = DockStyle.Top, Height = 80, BackColor = Color.White };
             header.Paint += (s, e) =>
             {
@@ -125,11 +135,11 @@ namespace autofact
             };
             header.Controls.Add(lblNumero);
 
-            // ── Form content (scrollable) ───────────────────────────────────
+            // ── Contenu du formulaire (zone de scroll) ──────────────────────
             var content = new Panel { Dock = DockStyle.Fill, BackColor = Color.FromArgb(244, 246, 250), AutoScroll = true };
             mainPanel.Controls.Add(content);
 
-            // Section 1: Document info
+            // ── Bloc 1 : Informations générales ────────────────────────────
             var infoPad = 24;
             content.Controls.Add(new Label
             {
@@ -140,7 +150,7 @@ namespace autofact
                 Location = new Point(infoPad, infoPad)
             });
 
-            // Client selector
+            // Sélection du client
             content.Controls.Add(new Label
             {
                 Text = "Client *",
@@ -171,7 +181,7 @@ namespace autofact
             };
             content.Controls.Add(cmbClient);
 
-            // Dates row
+            // Dates d'émission et d'échéance
             content.Controls.Add(new Label
             {
                 Text = "Date d'émission *",
@@ -208,7 +218,7 @@ namespace autofact
             };
             content.Controls.Add(dtEcheance);
 
-            // ── Section 2: Line items ──────────────────────────────────────
+            // ── Bloc 2 : Lignes de produits/services ───────────────────────
             content.Controls.Add(new Label
             {
                 Text = "Articles/Services",
@@ -218,7 +228,7 @@ namespace autofact
                 Location = new Point(infoPad, 210)
             });
 
-            // DataGridView
+            // Tableau des lignes
             dgvLignes = new DataGridView
             {
                 Location = new Point(infoPad, 240),
@@ -250,7 +260,7 @@ namespace autofact
             dgvLignes.ColumnHeadersHeight = 36;
             dgvLignes.RowTemplate.Height = 32;
 
-            // Columns: Article (ComboBox), Qty, Price, Discount %, Total
+            // Colonnes : Article (ComboBox), Qté, Prix, Remise %, Total
             var colArticle = new DataGridViewComboBoxColumn
             {
                 Name = "Article",
@@ -304,9 +314,10 @@ namespace autofact
             };
             dgvLignes.Columns.Add(colTotal);
 
+            // Recalcul des totaux lors de la modification
             dgvLignes.CellEndEdit += (s, e) =>
             {
-                if (e.ColumnIndex == 0) // Article selected
+                if (e.ColumnIndex == 0) // Article sélectionné
                 {
                     var presId = dgvLignes.Rows[e.RowIndex].Cells[0].Value;
                     if (presId is int id && id > 0)
@@ -334,7 +345,7 @@ namespace autofact
 
             content.Controls.Add(dgvLignes);
 
-            // Add line button
+            // Bouton ajouter ligne
             btnAddLine = new Button
             {
                 Text = "＋  Ajouter une ligne",
@@ -366,7 +377,7 @@ namespace autofact
             };
             content.Controls.Add(btnAddLine);
 
-            // ── Total section ──────────────────────────────────────────────
+            // ── Bloc 3 : Total ─────────────────────────────────────────────
             lblTotal = new Label
             {
                 Text = "Total HT :",
@@ -388,7 +399,7 @@ namespace autofact
             };
             content.Controls.Add(lblTotalValue);
 
-            // ── Footer (buttons) ───────────────────────────────────────────
+            // ── Pied de page : Boutons ─────────────────────────────────────
             var footer = new Panel { Dock = DockStyle.Bottom, Height = 80, BackColor = Color.White };
             footer.Paint += (s, e) =>
             {
@@ -397,6 +408,7 @@ namespace autofact
             };
             mainPanel.Controls.Add(footer);
 
+            // Bouton Enregistrer
             btnSave = new Button
             {
                 Text = "Enregistrer",
@@ -423,6 +435,7 @@ namespace autofact
             btnSave.Click += BtnSave_Click;
             footer.Controls.Add(btnSave);
 
+            // Bouton Annuler
             btnCancel = new Button
             {
                 Text = "Annuler",
@@ -440,6 +453,11 @@ namespace autofact
             footer.Controls.Add(btnCancel);
         }
 
+        // ══════════════════════════════════════════════════════════════════════
+        // CALCULS
+        // ══════════════════════════════════════════════════════════════════════
+
+        /// <summary>Recalcule le total d'une ligne (prix * qté - remise).</summary>
         private void RecalculateLineTotal(int rowIndex)
         {
             if (rowIndex < 0 || rowIndex >= dgvLignes.Rows.Count) return;
@@ -453,6 +471,7 @@ namespace autofact
             row.Cells[4].Value = total.ToString("F2");
         }
 
+        /// <summary>Recalcule et affiche le total général du document.</summary>
         private void RecalculateTotal()
         {
             decimal total = 0;
@@ -464,22 +483,28 @@ namespace autofact
             lblTotalValue.Text = total.ToString("F2") + " €";
         }
 
+        // ══════════════════════════════════════════════════════════════════════
+        // SAUVEGARDE
+        // ══════════════════════════════════════════════════════════════════════
+
+        /// <summary>Valide et enregistre le document.</summary>
         private async void BtnSave_Click(object? sender, EventArgs e)
         {
-            // Validate
+            // Validation : client sélectionné
             if (cmbClient.SelectedIndex < 0)
             {
                 MessageBox.Show("Veuillez sélectionner un client.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
+            // Validation : au moins une ligne
             if (dgvLignes.Rows.Count == 0 || (dgvLignes.Rows.Count == 1 && dgvLignes.Rows[0].IsNewRow))
             {
                 MessageBox.Show("Veuillez ajouter au moins une ligne.", "Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Verify all lines have valid PrestationId
+            // Validation : chaque ligne a un article et un prix valides
             foreach (DataGridViewRow row in dgvLignes.Rows)
             {
                 if (row.IsNewRow) continue;
@@ -500,17 +525,18 @@ namespace autofact
 
             try
             {
+                // Préparer le ViewModel (Facture ou Devis)
                 _viewModel = _services.NewFactureVM();
                 if (_docType == TypeDocument.Devis)
                     _viewModel = _services.NewDevisVM();
 
-                // Build document data
+                // Remplir les données du document
                 var clientId = _clients[cmbClient.SelectedIndex].Id;
                 _viewModel.ClientId = clientId;
                 _viewModel.DateEmission = dtEmission.Value;
                 _viewModel.DateEcheance = dtEcheance.Value;
 
-                // Add lines with validated PrestationId
+                // Ajouter les lignes avec validation
                 foreach (DataGridViewRow row in dgvLignes.Rows)
                 {
                     if (row.IsNewRow) continue;
@@ -524,12 +550,12 @@ namespace autofact
 
                     _viewModel.AjouterLigne(prestation, qty);
 
-                    // Apply discount to the added line
+                    // Appliquer la remise à la dernière ligne ajoutée
                     var addedLine = _viewModel.Lignes.Last();
                     addedLine.TauxRemise = discount;
                 }
 
-                // Save
+                // Enregistrer le document
                 btnSave.Enabled = false;
                 btnSave.Text = "Enregistrement...";
 
@@ -556,13 +582,18 @@ namespace autofact
             }
         }
 
+        // ══════════════════════════════════════════════════════════════════════
+        // CHARGEMENT DU FORMULAIRE
+        // ══════════════════════════════════════════════════════════════════════
+
+        /// <summary>Initialise le formulaire : charge les clients, articles et données existantes.</summary>
         protected override async void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
 
-            // Load clients and prestations asynchronously
             try
             {
+                // Charger les données de référence
                 _clients = await _services.Clients.TousAsync();
                 _prestations = await _services.Prestations.ToutesAsync();
 
@@ -570,7 +601,7 @@ namespace autofact
                 cmbClient.DisplayMember = "Nom";
                 cmbClient.ValueMember = "Id";
 
-                // Update DataGridView ComboBox column
+                // Mettre à jour la colonne article du DataGridView
                 var colArticle = dgvLignes.Columns[0] as DataGridViewComboBoxColumn;
                 if (colArticle != null)
                 {
@@ -579,22 +610,22 @@ namespace autofact
                     colArticle.ValueMember = "Id";
                 }
 
-                // Generate or load document
+                // Créer ou charger le ViewModel
                 if (_viewModel == null)
                     _viewModel = _docType == TypeDocument.Facture ? _services.NewFactureVM() : _services.NewDevisVM();
 
                 if (_isEditMode && _documentIdToEdit.HasValue)
                 {
-                    // Load existing document
+                    // Mode édition : charger le document existant
                     await _viewModel.ChargerAsync(_documentIdToEdit.Value);
 
-                    // Bind data to UI
+                    // Remplir les champs avec les données du document
                     cmbClient.SelectedValue = _viewModel.ClientId;
                     dtEmission.Value = _viewModel.DateEmission;
                     if (_viewModel.DateEcheance.HasValue)
                         dtEcheance.Value = _viewModel.DateEcheance.Value;
 
-                    // Populate lines in DataGridView
+                    // Remplir le tableau avec les lignes du document
                     dgvLignes.Rows.Clear();
                     foreach (var ligne in _viewModel.Lignes)
                     {
@@ -604,20 +635,21 @@ namespace autofact
                         dgvLignes.Rows[rowIdx].Cells[2].Value = ligne.Quantite;
                         dgvLignes.Rows[rowIdx].Cells[3].Value = ligne.PrixUnitaire;
                         dgvLignes.Rows[rowIdx].Cells[4].Value = ligne.TauxRemise;
-                        dgvLignes.Rows[rowIdx].Tag = ligne.Id; // Store ligne ID
+                        dgvLignes.Rows[rowIdx].Tag = ligne.Id;
                     }
                 }
                 else
                 {
-                    // New document
+                    // Mode création : générer un nouveau numéro
                     await _viewModel.InitialiserNumeroAsync();
                 }
 
+                // Afficher le numéro du document
                 var lblNum = Controls.Find("lblNumero", true).FirstOrDefault() as Label;
                 if (lblNum != null)
                     lblNum.Text = _viewModel.Numero;
 
-                // Update total
+                // Afficher le total
                 var lblTotal = Controls.Find("lblTotalValue", true).FirstOrDefault() as Label;
                 if (lblTotal != null)
                     lblTotal.Text = _viewModel.TotalHT.ToString("F2") + " €";
@@ -629,6 +661,11 @@ namespace autofact
             }
         }
 
+        // ══════════════════════════════════════════════════════════════════════
+        // UTILITAIRES
+        // ══════════════════════════════════════════════════════════════════════
+
+        /// <summary>Crée un rectangle arrondi pour les bordures.</summary>
         private static GraphicsPath RoundedRect(Rectangle r, int radius)
         {
             radius = Math.Max(1, Math.Min(radius, Math.Min(r.Width, r.Height) / 2));
