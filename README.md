@@ -122,7 +122,13 @@ INSERT INTO `declaration` (`periode`, `caCumule`, `montantPostPrelevement`, `cli
 ```
 ## Lancement
 
-    1. Dans Visual Studio, assurez-vous que la chaîne de connexion pointe vers l'IP de votre VM.
+Dans Visual Studio, assurez-vous que la chaîne de connexion pointe vers l'IP de votre VM.
 
-    2. Compilez et lancez le projet (F5).
+Dans
+
+```Chemin
+\AutoFact\appsettings.json
+```    
+
+Compilez et lancez le projet (F5).
 
