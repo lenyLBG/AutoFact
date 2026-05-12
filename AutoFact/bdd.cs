@@ -42,11 +42,11 @@ namespace autofact
                 {
                     Server = "192.168.56.200",
                     Port = 3306,
-                    Database = "Autofact",
+                    Database = "AutoFact",
                     UserID = "app",
                     Password = "Demaindeslaube",
                     SslMode = MySqlSslMode.None,
-                    ConnectionTimeout = 5
+                    ConnectionTimeout = 30
                 };
                 _connectionString = builder.ConnectionString;
             }
