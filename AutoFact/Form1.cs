@@ -1868,6 +1868,16 @@ namespace autofact
             // Use default WinForms rendering - it's stable and flicker-free
             lvDocuments.OwnerDraw = false;
 
+            // Double-click pour afficher les détails du document
+            lvDocuments.DoubleClick += async (s, e) =>
+            {
+                if (lvDocuments.SelectedItems.Count == 0) return;
+                if (!int.TryParse(lvDocuments.SelectedItems[0].Tag?.ToString(), out int docId)) return;
+
+                using var dlg = new FormDocumentDetail(db, docId);
+                dlg.ShowDialog(this);
+            };
+
             // Context menu: Marquer payé / Créer avoir / Exporter PDF
             var ctx = new ContextMenuStrip();
             var miModifier = new ToolStripMenuItem("✏️  Modifier");
@@ -2273,7 +2283,7 @@ namespace autofact
         // ══════════════════════════════════════════════════════════════════════
         // FORM LOAD
         // ══════════════════════════════════════════════════════════════════════
-        private async void Form1_Load(object sender, EventArgs e)
+        private async void Form1_Load(object? sender, EventArgs e)
         {
             // Auto-update schema to ensure new tables exist
             try { await db.InitializeDatabaseAsync(); } catch { }
@@ -2344,11 +2354,6 @@ namespace autofact
             path.AddArc(r.Left, r.Bottom - d, d, d, 90, 90);
             path.CloseFigure();
             return path;
-        }
-
-        private void Form1_Load_1(object sender, EventArgs e)
-        {
-
         }
     }
 }

@@ -36,7 +36,6 @@
             ClientSize = new Size(1280, 720);
             Name = "Form1";
             Text = "AutoFact";
-            Load += Form1_Load_1;
             ResumeLayout(false);
             // Load is wired in the constructor — do NOT add it here to avoid duplicate firing
         }
