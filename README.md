@@ -55,11 +55,14 @@ USE AutoFact;
 CREATE USER 'app'@'192.168.56.1' IDENTIFIED BY 'Un_M0t_d3_p@sse_trés_sécurisé';
 GRANT ALL PRIVILEGES ON AutoFact.* TO 'app'@'192.168.56.1';
 FLUSH PRIVILEGES;
-
+```
+Creation de l'utilisateur
+```SQL
 -- 1. Insertion de l'utilisateur administrateur
 INSERT INTO `utilisateur` (`email`, `mot_de_passe`, `date_inscription`, `actif`) 
 VALUES ('admin@autofact.fr', 'hashed_password_1', '2024-01-15', 1);
-
+```
+```SQL
 -- 2. Insertion des clients
 INSERT INTO `client` (`nom`, `adresse`, `mail`, `telephone`) VALUES
 ('Entreprise TechSoft', '123 Rue de la Paix, 75000 Paris', 'contact@techsoft.fr', '01 23 45 67 89'),
@@ -120,6 +123,6 @@ INSERT INTO `declaration` (`periode`, `caCumule`, `montantPostPrelevement`, `cli
 ## Lancement
 
     1. Dans Visual Studio, assurez-vous que la chaîne de connexion pointe vers l'IP de votre VM.
-    
+
     2. Compilez et lancez le projet (F5).
 
